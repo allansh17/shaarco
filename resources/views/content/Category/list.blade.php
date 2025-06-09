@@ -80,13 +80,14 @@
                     <div class="col-sm-12">
                         <div class="mb-3 fv-plugins-icon-container">
                             <label class="form-label" for="question">Brands<span class="text-danger">*</span></label>
-                            <select class="form-control form-select" id="brands" name="brands">
-                                    <option value="" selected disabled>Select Brands</option>
-                                    @foreach($brands as $brands_data)
-                                        <option value="{{$brands_data->id}}" {{ isset($product_detail) && $product_detail->brands == $brands_data->id ? 'selected' : '' }}>
-                                            {{$brands_data->name}}</option>
-                                    @endforeach
-                                </select>
+                            <select class="form-control form-select" id="brands" name="brands[]" multiple>
+                                <option value="" disabled>Select Brands</option>
+                                @foreach($brands as $brands_data)
+                                    <option value="{{$brands_data->id}}" {{ (isset($category_detail) && in_array($brands_data->id, $category_detail->brands->pluck('id')->toArray() ?? [])) ? 'selected' : '' }}>
+                                        {{$brands_data->name}}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
 

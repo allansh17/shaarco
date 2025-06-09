@@ -107,16 +107,11 @@
 <div class="col-sm-6 mt-2">
     <label class="form-label" for="category">Categories<span class="text-danger">*</span></label>
     <select class="form-control select2-category" id="category" name="category[]" multiple="multiple">
-        @if(isset($product_detail))
-            @foreach($category as $category_data)
-                @if($category_data->brands == $product_detail->brands)
-                    <option value="{{$category_data->id}}" 
-                        {{ in_array($category_data->id, explode(',', $product_detail->category_id)) ? 'selected' : '' }}>
-                        {{$category_data->name}}
-                    </option>
-                @endif
-            @endforeach
-        @endif
+        @foreach($category as $category_data)
+            <option value="{{$category_data->id}}">
+                {{$category_data->name}}
+            </option>
+        @endforeach
     </select>
     <div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback"></div>
 </div>
@@ -2943,36 +2938,5 @@ let editorInstance;
             });
 
 </script>
-<script type="text/javascript">
-//   $(document).ready(function () {
-    var categorySelect = $('#category');
 
-    // If no brand is selected initially, clear category dropdown
-    if ($('#brands').val() === null) {
-        categorySelect.empty().append('<option value="" disabled selected>Select Categories</option>');
-    }
-
-    $('#brands').on('change', function () {
-        var brand_id = $(this).val(); // Get selected brand ID
-        categorySelect.empty().append('<option value="" disabled>Select Categories</option>'); // Reset dropdown
-
-        if (brand_id) {
-            $.ajax({
-                url: "{{ route('get.categories.by.brand') }}", // Laravel route
-                type: "GET",
-                data: { brand_id: brand_id },
-                success: function (response) {
-                    if (response.status) {
-                        $.each(response.categories, function (key, value) {
-                            categorySelect.append('<option value="' + value.id + '">' + value.name + '</option>');
-                        });
-                    }
-                    categorySelect.trigger('change'); // Update Select2 UI
-                }
-            });
-        }
-    });
-// });
-
-</script>
 @endpush

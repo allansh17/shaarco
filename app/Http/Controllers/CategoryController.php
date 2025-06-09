@@ -120,9 +120,7 @@ class CategoryController extends Controller
 
     public function getData($search = null, $orderby = null, $order = null, $request = null)
     {
-      $q = Category::where('category.id', '!=', '0')
-        ->leftJoin('brands', 'category.brands', '=', 'brands.id')
-        ->select('category.*', 'brands.name as brand_name'); // Fetch brand name
+      $q = Category::where('category.id', '!=', '0');
         // print_r($q);die;
         $orderby = $orderby ? $orderby : 'created_at';
         $order = $order ? $order : 'desc';
@@ -179,19 +177,20 @@ class CategoryController extends Controller
             //if id found then update else insert
             if (isset($request->id) && $request->id > 0) {
                 //update
-                $brandid= Brands::find($request->brands);
                 $item = Category::find($request->id);
                 $item->name = $request->name;
                 $item->slug = Str::slug($request->name);
-                $item->brands = $brandid->id;
                 if ($profile_image = $request->file('image')) {
                     $destination_path = 'uploads/Category';
                     $source_path = $profile_image;
                     $file_name = image_upload_public($source_path, $destination_path);
                     $item->image = $file_name;
                 }
-
                 $item->save();
+                // Sync brands
+                if ($request->has('brands')) {
+                    $item->brands()->sync($request->brands);
+                }
                 if ($item) {
                     $res = array('code' => 200, 'msg' => 'Updated successfully');
                 } else {
@@ -199,23 +198,21 @@ class CategoryController extends Controller
                 }
             } else {
                 //store
-                 $brandid= Brands::find($request->brands);
                 $item = new Category;
                 $item->name = $request->name;
                 $item->slug = Str::slug($request->name);
-                // $item->brands = Brands::find($request->id);
-                   $item->brands = $brandid->id;
                 if ($profile_image = $request->file('image')) {
                     $destination_path = 'uploads/Category';
                     $source_path = $profile_image;
                     $file_name = image_upload_public($source_path, $destination_path);
-                    // dd($file_name);
-                    
                     $item->image = $file_name;
                 }
                 $item->status = '2';
-
                 $item->save();
+                // Sync brands
+                if ($request->has('brands')) {
+                    $item->brands()->sync($request->brands);
+                }
                 if ($item) {
                     $res = array('code' => 200, 'msg' => 'Added successfully');
                 } else {
@@ -329,12 +326,16 @@ class CategoryController extends Controller
   //       return response()->json(['categories' => $categoryfetch]);
   //   }
     public function fetchCategories(Request $request)
-{
-    $brands = $request->brands;
-    $categories = Category::whereIn('brands', $brands)->get(); // Fetch categories based on selected brands
+    {
+        $brands = $request->brands;
+        
+        // Fetch categories that are related to the selected brands using the many-to-many relationship
+        $categories = Category::whereHas('brands', function($q) use ($brands) {
+            $q->whereIn('brands.id', $brands);
+        })->get();
 
-    return response()->json(['categories' => $categories]);
-}
+        return response()->json(['categories' => $categories]);
+    }
 
 
 

@@ -667,9 +667,10 @@ public function searchproduct(Request $request)
 public function getCategoriesByBrand(Request $request)
 {
     $brand_id = $request->brand_id;
-
-    // Fetch categories where brand_id matches the selected brand
-    $categories = Category::whereIn('brands', [$brand_id])->get();
+    // Fetch categories related to the selected brand using the many-to-many relationship
+    $categories = \App\Models\Category::whereHas('brands', function($q) use ($brand_id) {
+        $q->where('brands.id', $brand_id);
+    })->get();
 
     if ($categories->count() > 0) {
         return response()->json(['status' => true, 'categories' => $categories]);

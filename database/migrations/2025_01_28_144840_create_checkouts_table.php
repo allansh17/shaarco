@@ -15,8 +15,8 @@ class CreateCheckoutsTable extends Migration
     {
         Schema::create('checkouts', function (Blueprint $table) {
             $table->id(); // Primary key
-            $table->unsignedBigInteger('user_id'); // Foreign key for user
-            $table->unsignedBigInteger('product_id'); // Foreign key for product
+            $table->integer('user_id'); // Foreign key for user
+            $table->integer('product_id'); // Foreign key for product
             $table->integer('qty'); // Quantity of the product
             $table->text('message')->nullable(); // Optional message field
             $table->timestamps(); // Created and updated timestamps

@@ -188,24 +188,22 @@ class HomeController extends Controller
     $selectedSubcategories = $request->input('subcategories', []);
     $selectedBrands = $request->input('brands', []);
 
-    // Define the base query for products
-    $productsQuery = Product::with(['category', 'subcategory', 'brands']) // Eager load relationships
-        ->whereNull('deleted_at'); // Soft deletes handle karna
+    // DEBUG: Log what we're filtering by
+    \Log::info('Product filtering:', [
+        'selectedBrands' => $selectedBrands,
+        'selectedCategories' => $selectedCategories,
+        'url' => $request->fullUrl()
+    ]);
 
-    // 🟢 **Apply Search Query (Name, Code, Category, Subcategory, Brand)**
+    // Define the base query for products using Query Builder for better control
+    $productsQuery = DB::table('products')
+        ->whereNull('deleted_at'); // Handle soft deletes
+
+    // 🟢 **Apply Search Query (Name, Code)**
     if (!empty($query)) {
         $productsQuery->where(function ($q) use ($query) {
             $q->where('name', 'like', "%{$query}%")
-              ->orWhere('code', 'like', "%{$query}%")
-              ->orWhereHas('category', function ($q) use ($query) {
-                  $q->where('name', 'like', "%{$query}%");
-              })
-              ->orWhereHas('subcategory', function ($q) use ($query) {
-                  $q->where('name', 'like', "%{$query}%");
-              })
-              ->orWhereHas('brands', function ($q) use ($query) {
-                  $q->where('name', 'like', "%{$query}%");
-              });
+              ->orWhere('code', 'like', "%{$query}%");
         });
     }
 
@@ -218,21 +216,39 @@ class HomeController extends Controller
         });
     }
 
+    // 🟢 **Apply Brand Filter**
+    if (!empty($selectedBrands)) {
+        $productsQuery->whereIn('brands', $selectedBrands);
+    }
+
+    // Count products after brand filter
+    $afterBrandCount = $productsQuery->count();
+    \Log::info('Products after brand filter: ' . $afterBrandCount);
+
     // 🟢 **Apply Category Filter (Multiple categories using FIND_IN_SET)**
     if (!empty($selectedCategories)) {
-        $categoryConditions = implode(',', array_fill(0, count($selectedCategories), '?'));
-        $productsQuery->whereRaw("EXISTS (SELECT 1 FROM category WHERE FIND_IN_SET(category.id, products.category_id) AND category.id IN ($categoryConditions))", $selectedCategories);
+        $productsQuery->where(function ($q) use ($selectedCategories) {
+            foreach ($selectedCategories as $categoryId) {
+                $q->orWhereRaw("FIND_IN_SET(?, category_id)", [$categoryId]);
+            }
+        });
+        
+        // Count products after category filter
+        $afterCategoryCount = $productsQuery->count();
+        \Log::info('Products after category filter: ' . $afterCategoryCount);
+        
+        // Show what products we have for debugging
+        $remainingProducts = $productsQuery->select('id', 'name', 'category_id', 'brands')->get();
+        \Log::info('Remaining products:', $remainingProducts->toArray());
     }
 
     // 🟢 **Apply Subcategory Filter (Multiple subcategories using FIND_IN_SET)**
     if (!empty($selectedSubcategories)) {
-        $subcategoryConditions = implode(',', array_fill(0, count($selectedSubcategories), '?'));
-        $productsQuery->whereRaw("EXISTS (SELECT 1 FROM subcategory WHERE FIND_IN_SET(subcategory.id, products.subcategory_id) AND subcategory.id IN ($subcategoryConditions))", $selectedSubcategories);
-    }
-
-    // 🟢 **Apply Brand Filter**
-    if (!empty($selectedBrands)) {
-        $productsQuery->whereIn('brands', $selectedBrands);
+        $productsQuery->where(function ($q) use ($selectedSubcategories) {
+            foreach ($selectedSubcategories as $subcategoryId) {
+                $q->orWhereRaw("FIND_IN_SET(?, subcategory_id)", [$subcategoryId]);
+            }
+        });
     }
 
     // 🟢 **Paginate Products (12 Per Page)**

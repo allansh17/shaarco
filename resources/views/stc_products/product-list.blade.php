@@ -70,11 +70,11 @@
                         <div class="select_filter">
                               <div id="categories-container">
                             <h4>فئات</h4>
-                            @foreach ($brands as $category)
+                            @foreach ($categories as $category)
                                 <div class="form-check-f">
                                     <input class="form-check-input" type="checkbox" name="categories[]"
                                         value="{{ $category->id }}" id="category-{{ $category->id }}"
-                                        @if(in_array($category->id, $selectedBrands)) checked @endif>
+                                        @if(in_array($category->id, $selectedCategories)) checked @endif>
                                     <label class="form-check-label"
                                         for="category-{{ $category->id }}">{{ $category->name }}</label>
                                 </div>
@@ -420,8 +420,9 @@
         if (selectedBrands.length > 0) {
             fetchCategories(selectedBrands, selectedCategories); // ✅ Brand select hote hi categories fetch
         } else {
-            categoryContainer.style.display = "none";
-            subcategoryContainer.style.display = "none";
+            // Do not hide the categories container when no brand is selected
+            // categoryContainer.style.display = "none";
+            // subcategoryContainer.style.display = "none";
         }
 
         submitForm(); // Form auto-submit
@@ -679,11 +680,18 @@ $(document).ready(function () {
             }
         });
 
+        // Extracting categories from the URL correctly
+        urlParams.forEach((value, key) => {
+            if (key.startsWith("categories")) {
+                selectedCategories.push(value);
+            }
+        });
+
         let categoryContainer = document.getElementById("categories-container");
 
         // Show categories when brands are selected
         if (selectedBrands.length > 0) {
-            fetchCategories(selectedBrands);
+            fetchCategories(selectedBrands, selectedCategories);
         }
 
         // Listen for brand selection changes
@@ -695,14 +703,14 @@ $(document).ready(function () {
 
             // Fetch categories when brands are selected/deselected
             if (selectedBrands.length > 0) {
-                fetchCategories(selectedBrands);
+                fetchCategories(selectedBrands, selectedCategories);
             } else {
-                categoryContainer.style.display = "none";
+                // categoryContainer.style.display = "none";
             }
         });
 
         // Function to fetch categories based on selected brands
-        function fetchCategories(brands) {
+        function fetchCategories(brands, selectedCategories) {
             fetch("{{ route('fetch.categories') }}", {
                 method: "POST",
                 headers: {
@@ -715,7 +723,7 @@ $(document).ready(function () {
             .then(data => {
                 categoryContainer.innerHTML = ""; // Clear old categories
                 if (data.categories.length > 0) {
-                    let checkbox = ``;
+                    let checkbox = `<h4>فئات</h4>`;
                     categoryContainer.style.display = "block"; // Show category filter
                     data.categories.forEach(category => {
                         let checked = selectedCategories.includes(category.id.toString()) ? "checked" : "";
@@ -728,7 +736,7 @@ $(document).ready(function () {
                                 </label>
                             </div>`;
                     });
-                    categoryContainer.innerHTML += checkbox;
+                    categoryContainer.innerHTML = checkbox;
 
                     // Add change event listener to categories
                     document.querySelectorAll('input[name="categories[]"]').forEach(catCheckbox => {
@@ -743,7 +751,7 @@ $(document).ready(function () {
             .catch(error => console.log(error));
         }
     });
-</script> -->
+</script>
 
 
     @endpush
