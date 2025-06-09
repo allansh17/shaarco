@@ -33,7 +33,7 @@
     }
     /* Add red border to the brands section */
     .brands_section {
-        border: 2px solid #ff0000;
+        border: 2px solid #ffd600;
         border-radius: 24px;
         background: #f6fbff;
         padding: 28px 0 18px 0;
