@@ -31,6 +31,14 @@
         margin: 0 auto;
         background: #fff;
     }
+    /* Add red border to the brands section */
+    .brands_section {
+        border: 2px solid #ff0000;
+        border-radius: 24px;
+        background: #f6fbff;
+        padding: 28px 0 18px 0;
+        margin-bottom: 40px;
+    }
     @media (max-width: 991px) {
         .imag_offer {
             display: block !important;
