@@ -76,6 +76,184 @@
         box-shadow: 0 8px 32px 0 #3887cd44, 0 3px 12px 0 #3887cd33;
         transform: translateY(-6px) scale(1.01);
     }
+
+    /* Thumbnail Gallery Styles */
+    .thumbnail-gallery {
+        padding: 60px 0;
+        background: linear-gradient(135deg, #f8faff 0%, #e3f2fd 100%);
+        margin: 40px 0;
+    }
+    
+    .gallery-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+    
+    .gallery-header h2 {
+        font-size: 2.5rem;
+        color: #1b6392;
+        font-weight: 700;
+        margin-bottom: 15px;
+        text-shadow: 0 2px 4px rgba(27, 99, 146, 0.1);
+    }
+    
+    .gallery-header p {
+        font-size: 1.1rem;
+        color: #666;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .gallery-tabs {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 40px;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .tab-button {
+        background: linear-gradient(135deg, #3887CD 0%, #2c6bb3 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 30px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(56, 135, 205, 0.3);
+    }
+    
+    .tab-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(56, 135, 205, 0.4);
+    }
+    
+    .tab-button.active {
+        background: linear-gradient(135deg, #1b6392 0%, #0d4a73 100%);
+        transform: translateY(-2px);
+    }
+    
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .thumbnail-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s ease;
+        position: relative;
+        cursor: pointer;
+    }
+    
+    .thumbnail-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 50px rgba(56, 135, 205, 0.15);
+    }
+    
+    .thumbnail-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+    
+    .thumbnail-card:hover .thumbnail-image {
+        transform: scale(1.1);
+    }
+    
+    .thumbnail-content {
+        padding: 20px;
+        text-align: center;
+    }
+    
+    .thumbnail-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #1b6392;
+        margin-bottom: 8px;
+    }
+    
+    .thumbnail-subtitle {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 15px;
+    }
+    
+    .thumbnail-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .thumbnail-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(56, 135, 205, 0.8) 0%, rgba(27, 99, 146, 0.9) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    
+    .thumbnail-card:hover .thumbnail-overlay {
+        opacity: 1;
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+        animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @media (max-width: 768px) {
+        .gallery-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .thumbnail-image {
+            height: 150px;
+        }
+        
+        .gallery-header h2 {
+            font-size: 2rem;
+        }
+        
+        .tab-button {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+    }
 </style>
 <!-- machine-text-carousel-start -->
 
@@ -131,13 +309,106 @@
     </div>
 </div>
 
+<!-- Thumbnail Gallery Section -->
+<div class="thumbnail-gallery">
+    <div class="container">
+        <div class="gallery-header">
+            <h2>استكشف علاماتنا التجارية وفئاتنا</h2>
+            <p>اكتشف مجموعتنا الواسعة من العلامات التجارية والفئات والفئات الفرعية المختارة بعناية</p>
+        </div>
+        
+        <div class="gallery-tabs">
+            <button class="tab-button active" onclick="showTab('brands')">العلامات التجارية</button>
+            <button class="tab-button" onclick="showTab('categories')">الفئات</button>
+            <button class="tab-button" onclick="showTab('subcategories')">الفئات الفرعية</button>
+        </div>
+        
+        <!-- Brands Tab Content -->
+        <div id="brands" class="tab-content active">
+            <div class="gallery-grid">
+                @foreach($brands as $brand)
+                    <div class="thumbnail-card" onclick="window.location.href='{{route('products', ['brands[]' => $brand->id])}}'">
+                        <img src="{{asset('uploads/Brands/' . $brand->image)}}" alt="{{$brand->name}}" class="thumbnail-image">
+                        <div class="thumbnail-content">
+                            <div class="thumbnail-title">{{$brand->name}}</div>
+                            <div class="thumbnail-subtitle">علامة تجارية</div>
+                        </div>
+                        <div class="thumbnail-badge">Brand</div>
+                        <div class="thumbnail-overlay">
+                            <span>اعرض المنتجات</span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+        
+        <!-- Categories Tab Content -->
+        <div id="categories" class="tab-content">
+            <div class="gallery-grid">
+                @foreach($categorys as $category)
+                    <div class="thumbnail-card" onclick="window.location.href='{{route('products', ['categories[]' => $category->id])}}'">
+                        <img src="{{asset('uploads/Category/' . $category->image)}}" alt="{{$category->name}}" class="thumbnail-image">
+                        <div class="thumbnail-content">
+                            <div class="thumbnail-title">{{$category->name}}</div>
+                            <div class="thumbnail-subtitle">فئة</div>
+                        </div>
+                        <div class="thumbnail-badge" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">فئة</div>
+                        <div class="thumbnail-overlay">
+                            <span>اعرض المنتجات</span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+        
+        <!-- Subcategories Tab Content -->
+        <div id="subcategories" class="tab-content">
+            <div class="gallery-grid">
+                @foreach($subcategories as $subcategory)
+                    <div class="thumbnail-card" onclick="window.location.href='{{route('products', ['subcategories[]' => $subcategory->id])}}'">
+                        @if($subcategory->image)
+                            <img src="{{asset('uploads/SubCategory/' . $subcategory->image)}}" alt="{{$subcategory->name}}" class="thumbnail-image">
+                        @else
+                            <div class="thumbnail-image" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); display: flex; align-items: center; justify-content: center; color: #6c757d; font-size: 1.2rem;">
+                                <i class="fas fa-folder"></i>
+                            </div>
+                        @endif
+                        <div class="thumbnail-content">
+                            <div class="thumbnail-title">{{$subcategory->name}}</div>
+                            <div class="thumbnail-subtitle">فئة فرعية</div>
+                        </div>
+                        <div class="thumbnail-badge" style="background: linear-gradient(135deg, #6f42c1 0%, #8b5cf6 100%);">فرعية</div>
+                        <div class="thumbnail-overlay">
+                            <span>اعرض المنتجات</span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+</div>
 
-
-
-
-
-
-
+<script>
+    function showTab(tabName) {
+        // Hide all tab contents
+        const tabContents = document.querySelectorAll('.tab-content');
+        tabContents.forEach(content => {
+            content.classList.remove('active');
+        });
+        
+        // Remove active class from all buttons
+        const tabButtons = document.querySelectorAll('.tab-button');
+        tabButtons.forEach(button => {
+            button.classList.remove('active');
+        });
+        
+        // Show selected tab content
+        document.getElementById(tabName).classList.add('active');
+        
+        // Add active class to clicked button
+        event.target.classList.add('active');
+    }
+</script>
 
 <!-- machine-text-carousel-start -->
 
