@@ -333,13 +333,27 @@ class CategoryController extends Controller
   //       return response()->json(['categories' => $categoryfetch]);
   //   }
     public function fetchCategories(Request $request)
-{
-    $brands = $request->brands;
-    $categories = Category::whereIn('brands', $brands)->get(); // Fetch categories based on selected brands
+    {
+        $brands = $request->brands;
+        
+        // Fetch categories that have any of the selected brands using the many-to-many relationship
+        $categories = Category::whereHas('brands', function($query) use ($brands) {
+            $query->whereIn('brand_id', $brands);
+        })->get();
 
-    return response()->json(['categories' => $categories]);
-}
+        return response()->json(['categories' => $categories]);
+    }
 
+    public function fetchBrands(Request $request)
+    {
+        $categories = $request->categories;
+        
+        // Fetch brands that belong to any of the selected categories using the many-to-many relationship
+        $brands = Brands::whereHas('categories', function($query) use ($categories) {
+            $query->whereIn('category_id', $categories);
+        })->get();
 
+        return response()->json(['brands' => $brands]);
+    }
 
 };

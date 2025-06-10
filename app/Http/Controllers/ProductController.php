@@ -292,7 +292,7 @@ public function searchproduct(Request $request)
     public function create()
     {
         $brands  = Brands::orderBy('name', 'asc')->get();
-        $category  = Category::orderBy('name', 'asc')->get();
+        $category  = Category::with('brands')->orderBy('name', 'asc')->get();
         $subcategory  = SubCategory::orderBy('name', 'asc')->get();
         $lifestyle_gear  = Lifestyle::where('status', '1')->orderBy('name', 'asc')->get();
         $Feature_Products  = Feature_Products::where('status', '1')->orderBy('name', 'asc')->get();
@@ -387,7 +387,7 @@ public function searchproduct(Request $request)
             $item->code = $request->code;
             $item->brands = $request->brands;
             // $item->category_id = $request->category;
-            $item->category_id = implode(',', $request->category);
+            $item->category_id = $request->has('category') && is_array($request->category) ? implode(',', $request->category) : '';
             $item->origin = $request->origin;
            
             $item->normal_price = $request->normal_price;
@@ -424,8 +424,8 @@ public function searchproduct(Request $request)
         $item->new_products = $request->new_products ?? 0;
         $item->most_populer = $request->most_populer ?? 0;
 
-                $item->titles = implode(',', $request->titles);
-                $item->descriptions = implode(',', $request->descriptions);
+                $item->titles = $request->has('titles') && is_array($request->titles) ? implode(',', $request->titles) : '';
+                $item->descriptions = $request->has('descriptions') && is_array($request->descriptions) ? implode(',', $request->descriptions) : '';
 
             //if Product Introduction  image set then upload
             if ($image = $request->file('attachments')) {
@@ -537,7 +537,7 @@ public function searchproduct(Request $request)
             $item->code = $request->code;
             $item->brands = $request->brands;
             // $item->category_id = $request->category;
-            $item->category_id = implode(',', $request->category);
+            $item->category_id = $request->has('category') && is_array($request->category) ? implode(',', $request->category) : '';
             $item->origin = $request->origin;
             $item->normal_price = $request->normal_price;
             // $item->subcategory_id = $request->subcategory;
@@ -571,8 +571,8 @@ public function searchproduct(Request $request)
         $item->new_products = $request->new_products ?? 0;
                 $item->most_populer = $request->most_populer ?? 0;
 
-                $item->titles = implode(',', $request->titles);
-                $item->descriptions = implode(',', $request->descriptions);
+                $item->titles = $request->has('titles') && is_array($request->titles) ? implode(',', $request->titles) : '';
+                $item->descriptions = $request->has('descriptions') && is_array($request->descriptions) ? implode(',', $request->descriptions) : '';
 
             //if Product Introduction  image set then upload
             if ($image = $request->file('attachments')) {
@@ -668,8 +668,10 @@ public function getCategoriesByBrand(Request $request)
 {
     $brand_id = $request->brand_id;
 
-    // Fetch categories where brand_id matches the selected brand
-    $categories = Category::whereIn('brands', [$brand_id])->get();
+    // Fetch categories that have the selected brand using the many-to-many relationship
+    $categories = Category::whereHas('brands', function($query) use ($brand_id) {
+        $query->where('brand_id', $brand_id);
+    })->get();
 
     if ($categories->count() > 0) {
         return response()->json(['status' => true, 'categories' => $categories]);
@@ -692,7 +694,7 @@ public function getCategoriesByBrand(Request $request)
             
             $ListingImages=ListingImages::where('product_id',$id)->get();
             $brands  = Brands::orderBy('name', 'asc')->get();
-            $category  = Category::orderBy('name', 'asc')->get();
+            $category  = Category::with('brands')->orderBy('name', 'asc')->get();
             $subcategory  = SubCategory::orderBy('name', 'asc')->get();
          
             $data['brands'] = $brands;

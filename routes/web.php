@@ -407,6 +407,7 @@ Route::group(['middleware' => 'can:staff_report'], function () {
 Route::post('/fetch-subcategories', [SubCategoryController::class, 'fetchSubcategories'])->name('fetch.subcategories');
 // Route::post('/fetch-categories', [CategoryController::class, 'fetchcategories'])->name('fetch.categories');
 Route::post('/fetch-categories', [CategoryController::class, 'fetchCategories'])->name('fetch.categories');
+Route::post('/fetch-brands', [CategoryController::class, 'fetchBrands'])->name('fetch.brands');
 
 
 
