@@ -109,14 +109,10 @@
     width: 35px;
     height: 35px;
     border-radius: 50%;
-    object-fit: contain;
-    object-position: center;
+    object-fit: cover;
     border: 2px solid #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
-    flex-shrink: 0;
-    background: #ffffff;
-    padding: 2px;
 }
 
 .bubble-filter:hover .bubble-image {
@@ -230,83 +226,47 @@
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .bubble-container {
-        gap: 8px;
+        gap: 10px;
     }
     
     .bubble-filter {
-        padding: 8px 12px;
-        min-height: 45px;
-        gap: 6px;
+        padding: 10px 15px;
+        min-height: 50px;
+        gap: 8px;
     }
     
     .bubble-image {
-        width: 28px;
-        height: 28px;
-        border-width: 1.5px;
+        width: 30px;
+        height: 30px;
     }
     
     .bubble-text {
-        font-size: 0.8rem;
-        font-weight: 500;
+        font-size: 0.85rem;
     }
     
     .bubble-filters-header h3 {
-        font-size: 1.4rem;
+        font-size: 1.5rem;
     }
     
     .bubble-filter-category h4 {
-        font-size: 0.95rem;
-        padding: 5px 12px;
-    }
-    
-    .bubble-selected-badge {
-        width: 18px;
-        height: 18px;
-        font-size: 10px;
-        top: -3px;
-        right: -3px;
+        font-size: 1rem;
+        padding: 6px 15px;
     }
 }
 
 @media (max-width: 576px) {
-    .bubble-container {
-        gap: 6px;
-        justify-content: flex-start;
-        overflow-x: auto;
-        padding-bottom: 5px;
-        scrollbar-width: thin;
-    }
-    
     .bubble-filter {
-        padding: 6px 10px;
-        min-height: 40px;
-        gap: 5px;
-        white-space: nowrap;
-        flex-shrink: 0;
+        padding: 8px 12px;
+        min-height: 45px;
     }
     
     .bubble-image {
-        width: 24px;
-        height: 24px;
-        border-width: 1px;
+        width: 25px;
+        height: 25px;
     }
     
     .bubble-text {
-        font-size: 0.75rem;
-        font-weight: 500;
-    }
-    
-    .bubble-filters-section {
-        padding: 20px 15px;
-    }
-    
-    .bubble-filters-header h3 {
-        font-size: 1.2rem;
-    }
-    
-    .bubble-filter-category h4 {
-        font-size: 0.9rem;
-        padding: 4px 10px;
+        font-size: 0.8rem;
     }
 }
 </style>
