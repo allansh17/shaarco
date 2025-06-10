@@ -70,24 +70,23 @@
 
                 </div>
 
-               <!--  <div class="row">
+                <div class="row">
                     <div class="col-sm-12">
                         <div class="mb-3 fv-plugins-icon-container">
                             <label class="form-label" for="question">Category<span class="text-danger">*</span></label>
                             <select class="form-control form-select" id="category" name="category[]" multiple>
-                                    <option value="" selected disabled>Select Category</option>
-                                    @foreach($categoryss as $category_data)
-                                        <option value="{{$category_data->id}}" {{ isset($product_detail) && ($product_detail->category_id == $category_data->id) ? 'selected' : '' }}>
-                                            {{$category_data->name}}</option>
-                                    @endforeach
-                                </select>
-                                <div
-                                    class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback">
-                                </div>
+                                <option value="" disabled>Select Category</option>
+                                @foreach($categoryss as $category_data)
+                                    <option value="{{$category_data->id}}">
+                                        {{$category_data->name}}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback">
+                            </div>
                         </div>
                     </div>
-
-                </div> -->
+                </div>
                 <div class="mb-3 fv-plugins-icon-container">
                     <label class="form-label" for="profile-image">Image</label>
                     <input type="file" id="add-user-contact" class="form-control phone-mask mb-2 img_name" placeholder="Brands Image" aria-label=".jpeg" name="image">

@@ -179,7 +179,6 @@ class BrandsController extends Controller
                 //update
                 $item = Brands::find($request->id);
                 $item->name = $request->name;
-                 $item->category_id = implode(',', $request->category);
                 $item->slug = Str::slug($request->name);
                 if ($profile_image = $request->file('image')) {
                     $destination_path = 'uploads/Brands';
@@ -189,6 +188,12 @@ class BrandsController extends Controller
                 }
 
                 $item->save();
+                
+                // Sync categories
+                if ($request->has('category') && is_array($request->category)) {
+                    $item->categories()->sync($request->category);
+                }
+
                 if ($item) {
                     $res = array('code' => 200, 'msg' => 'Updated successfully');
                 } else {
@@ -201,14 +206,18 @@ class BrandsController extends Controller
                 $item->slug = Str::slug($request->name);
                 if ($profile_image = $request->file('image')) {
                     $destination_path = 'uploads/Brands';
-                     $item->category_id = implode(',', $request->category);
                     $source_path = $profile_image;
                     $file_name = image_upload_public($source_path, $destination_path);
                     $item->image = $file_name;
                 }
                 $item->status = '2';
-
                 $item->save();
+
+                // Attach categories
+                if ($request->has('category') && is_array($request->category)) {
+                    $item->categories()->attach($request->category);
+                }
+
                 if ($item) {
                     $res = array('code' => 200, 'msg' => 'Added successfully');
                 } else {
