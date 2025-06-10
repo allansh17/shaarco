@@ -106,17 +106,20 @@
 
 /* Bubble Image */
 .bubble-image {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    object-fit: contain;
-    object-position: center;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
-    flex-shrink: 0;
-    background: #ffffff;
-    padding: 2px;
+    width: 35px !important;
+    height: 35px !important;
+    border-radius: 50% !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    border: 2px solid #fff !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    transition: transform 0.3s ease !important;
+    flex-shrink: 0 !important;
+    background: #ffffff !important;
+    padding: 3px !important;
+    display: block !important;
+    max-width: 35px !important;
+    max-height: 35px !important;
 }
 
 .bubble-filter:hover .bubble-image {
@@ -165,6 +168,19 @@
 .bubble-filter.selected .bubble-selected-badge {
     opacity: 1;
     transform: scale(1.1);
+}
+
+/* Specific styles for category images */
+#categories-container .bubble-image,
+#categories-section .bubble-image {
+    width: 35px !important;
+    height: 35px !important;
+    border-radius: 50% !important;
+    object-fit: contain !important;
+    background: #ffffff !important;
+    padding: 3px !important;
+    max-width: 35px !important;
+    max-height: 35px !important;
 }
 
 /* Fallback for items without images */
@@ -240,9 +256,12 @@
     }
     
     .bubble-image {
-        width: 28px;
-        height: 28px;
-        border-width: 1.5px;
+        width: 28px !important;
+        height: 28px !important;
+        max-width: 28px !important;
+        max-height: 28px !important;
+        border-width: 1.5px !important;
+        padding: 2px !important;
     }
     
     .bubble-text {
@@ -286,9 +305,12 @@
     }
     
     .bubble-image {
-        width: 24px;
-        height: 24px;
-        border-width: 1px;
+        width: 24px !important;
+        height: 24px !important;
+        max-width: 24px !important;
+        max-height: 24px !important;
+        border-width: 1px !important;
+        padding: 2px !important;
     }
     
     .bubble-text {
