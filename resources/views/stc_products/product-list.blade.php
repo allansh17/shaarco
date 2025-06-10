@@ -11,264 +11,6 @@
     color: red;
 }
 
-/* Bubble Filter Styles */
-.bubble-filters-section {
-    background: linear-gradient(135deg, #f8faff 0%, #e3f2fd 100%);
-    padding: 30px 20px;
-    margin: 20px 0;
-    border-radius: 25px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-}
-
-.bubble-filters-header {
-    text-align: center;
-    margin-bottom: 25px;
-}
-
-.bubble-filters-header h3 {
-    color: #1b6392;
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 10px;
-    text-shadow: 0 2px 4px rgba(27, 99, 146, 0.1);
-}
-
-.bubble-filters-subtitle {
-    color: #666;
-    font-size: 1rem;
-    margin-bottom: 0;
-}
-
-.bubble-filter-category {
-    margin-bottom: 25px;
-}
-
-.bubble-filter-category h4 {
-    color: #2c3e50;
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin-bottom: 15px;
-    text-align: center;
-    padding: 8px 20px;
-    background: linear-gradient(135deg, #3887CD 0%, #2c6bb3 100%);
-    color: white;
-    border-radius: 20px;
-    display: inline-block;
-    margin: 0 auto 15px auto;
-    display: block;
-    width: fit-content;
-    box-shadow: 0 4px 15px rgba(56, 135, 205, 0.3);
-}
-
-/* Bubble Container */
-.bubble-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-/* Individual Bubble */
-.bubble-filter {
-    position: relative;
-    background: white;
-    border-radius: 50px;
-    padding: 12px 20px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    cursor: pointer;
-    border: 3px solid transparent;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 60px;
-    overflow: hidden;
-}
-
-.bubble-filter:hover {
-    transform: translateY(-5px) scale(1.05);
-    box-shadow: 0 12px 35px rgba(56, 135, 205, 0.2);
-    border-color: #3887CD;
-}
-
-.bubble-filter.selected {
-    background: linear-gradient(135deg, #3887CD 0%, #2c6bb3 100%);
-    color: white;
-    border-color: #1b6392;
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 10px 30px rgba(56, 135, 205, 0.4);
-}
-
-.bubble-filter input[type="checkbox"] {
-    display: none;
-}
-
-/* Bubble Image */
-.bubble-image {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
-}
-
-.bubble-filter:hover .bubble-image {
-    transform: scale(1.1) rotate(5deg);
-}
-
-.bubble-filter.selected .bubble-image {
-    border-color: #fff;
-    transform: scale(1.05);
-}
-
-/* Bubble Text */
-.bubble-text {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #2c3e50;
-    margin: 0;
-    white-space: nowrap;
-    transition: color 0.3s ease;
-}
-
-.bubble-filter.selected .bubble-text {
-    color: white;
-}
-
-/* Bubble Selected Badge */
-.bubble-selected-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-    color: white;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    opacity: 0;
-    transition: all 0.3s ease;
-    border: 2px solid white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.bubble-filter.selected .bubble-selected-badge {
-    opacity: 1;
-    transform: scale(1.1);
-}
-
-/* Fallback for items without images */
-.bubble-placeholder {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #6c757d;
-    font-size: 1.2rem;
-    border: 2px solid #ddd;
-}
-
-.bubble-filter.selected .bubble-placeholder {
-    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-    color: #3887CD;
-    border-color: #fff;
-}
-
-/* Traditional checkboxes for subcategories */
-.subcategory-checkboxes {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-}
-
-.subcategory-bubble {
-    background: white;
-    border: 2px solid #e9ecef;
-    border-radius: 25px;
-    padding: 8px 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-    color: #495057;
-}
-
-.subcategory-bubble:hover {
-    border-color: #3887CD;
-    background: #f8faff;
-    transform: translateY(-2px);
-}
-
-.subcategory-bubble.selected {
-    background: linear-gradient(135deg, #3887CD 0%, #2c6bb3 100%);
-    color: white;
-    border-color: #1b6392;
-}
-
-.subcategory-bubble input[type="checkbox"] {
-    display: none;
-}
-
-/* Hide/Show Sections */
-.bubble-filter-category.hidden {
-    display: none;
-}
-
-/* Mobile Responsive */
-@media (max-width: 768px) {
-    .bubble-container {
-        gap: 10px;
-    }
-    
-    .bubble-filter {
-        padding: 10px 15px;
-        min-height: 50px;
-        gap: 8px;
-    }
-    
-    .bubble-image {
-        width: 30px;
-        height: 30px;
-    }
-    
-    .bubble-text {
-        font-size: 0.85rem;
-    }
-    
-    .bubble-filters-header h3 {
-        font-size: 1.5rem;
-    }
-    
-    .bubble-filter-category h4 {
-        font-size: 1rem;
-        padding: 6px 15px;
-    }
-}
-
-@media (max-width: 576px) {
-    .bubble-filter {
-        padding: 8px 12px;
-        min-height: 45px;
-    }
-    
-    .bubble-image {
-        width: 25px;
-        height: 25px;
-    }
-    
-    .bubble-text {
-        font-size: 0.8rem;
-    }
-}
 </style>
 
 <div class="breadcrumb_card">
@@ -289,63 +31,88 @@
     </div>
 </div>
 
-<!-- Bubble Filters Section -->
-<div class="container">
-    <div class="bubble-filters-section">
-        <div class="bubble-filters-header">
-            <h3>اختر فئاتك المفضلة</h3>
-            <p class="bubble-filters-subtitle">اختر من العلامات التجارية والفئات لتصفية المنتجات</p>
-        </div>
-
-        <form method="GET" action="{{ route('products') }}" id="filter-form">
-            <!-- Hidden Input for Search Query -->
-            <input type="hidden" name="query1" id="hiddenSearchQuery" value="{{ request('query1') }}">
-            
-            <!-- Brands Bubbles -->
-            <div class="bubble-filter-category" id="brands-section">
-                <h4>العلامات التجارية</h4>
-                <div class="bubble-container">
-                    @foreach ($brands as $brand)
-                        <div class="bubble-filter {{ in_array($brand->id, $selectedBrands) ? 'selected' : '' }}" 
-                             onclick="toggleBubbleFilter(this, 'brands[]', '{{ $brand->id }}')">
-                            <input type="checkbox" name="brands[]" value="{{ $brand->id }}" 
-                                   id="brand-{{ $brand->id }}" 
-                                   {{ in_array($brand->id, $selectedBrands) ? 'checked' : '' }}>
-                            <img src="{{asset('uploads/Brands/' . $brand->image)}}" 
-                                 alt="{{$brand->name}}" class="bubble-image">
-                            <span class="bubble-text">{{ $brand->name }}</span>
-                            <div class="bubble-selected-badge">
-                                <i class="fas fa-check"></i>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-
-            <!-- Categories Bubbles -->
-            <div class="bubble-filter-category hidden" id="categories-section">
-                <h4>الفئات</h4>
-                <div class="bubble-container" id="categories-container">
-                    <!-- Categories will be dynamically loaded -->
-                </div>
-            </div>
-
-            <!-- Subcategories Bubbles -->
-            <div class="bubble-filter-category hidden" id="subcategories-section">
-                <h4>الفئات الفرعية</h4>
-                <div class="subcategory-checkboxes" id="subcategories-container">
-                    <!-- Subcategories will be dynamically loaded -->
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
 
 <div class="product_list_p">
     <div class="container">
         <div class="row">
+            <div class="col-md-4 col-lg-3">
+                <form method="GET" action="{{ route('products') }}" id="filter-form">
+                     <!-- Hidden Input for Search Query -->
+                    <input type="hidden" name="query1" id="hiddenSearchQuery" value="{{ request('query1') }}">
+                    <div class="filter_card">
+                        <h3>ترشيح</h3>
+
+                        <!-- Brand Filters -->
+                        <div class="select_filter">
+    <h4>علامات تجارية</h4>
+    @foreach ($brands as $brand)
+        <div class="form-check-f">
+            <input class="form-check-input brand-checkbox" type="checkbox" name="brands[]" 
+                value="{{ $brand->id }}" id="brand-{{ $brand->id }}" 
+                @if(in_array($brand->id, $selectedBrands)) checked @endif>
+            <label class="form-check-label" for="brand-{{ $brand->id }}">{{ $brand->name }}</label>
+        </div>
+    @endforeach
+</div>
+
+                        <!-- div class="select_filter">
+                            <h4>علامات تجارية</h4>
+                            @foreach ($brands as $brand)
+                                <div class="form-check-f">
+                                    <input class="form-check-input" type="checkbox" name="brands[]" value="{{ $brand->id }}"
+                                        id="brand-{{ $brand->id }}" @if(in_array($brand->id, $selectedBrands)) checked @endif>
+                                    <label class="form-check-label" for="brand-{{ $brand->id }}">{{ $brand->name }}</label>
+                                </div>
+                            @endforeach
+                        </div> -->
+
+                        <!-- Category Filters -->
+                        <div class="select_filter">
+                              <div id="categories-container" style="display: none;">
+                            <h4>فئات</h4>
+                            <!-- Categories will be dynamically loaded based on selected brands -->
+                             </div>
+                        </div>
+
+                        <!-- <div class="select_filter">
+                            @if(isset($subcategorys))
+                                <h4>Sub Category</h4>
+                                @foreach ($subcategorys as $subcategory)
+                                    <div class="form-check-f">
+                                        <input class="form-check-input" type="checkbox" name="subcategories[]"
+                                            value="{{ $subcategory->id }}" id="subcategory-{{ $subcategory->id }}"
+                                            @if(in_array($subcategory->id, $selectedsubCategories)) checked @endif>
+                                        <label class="form-check-label"
+                                            for="subcategory-{{ $subcategory->id }}">{{ $subcategory->name }}</label>
+                                    </div>
+                                @endforeach
+                            @endif
+                        </div> -->
+
+                        <div class="select_filter">
+                            
+                            <div id="subcategories-container" style="display: none;">
+                                @if(isset($subcategorys) && count($subcategorys) > 0)
+                                    @foreach ($subcategorys as $subcategory)
+                                        <div class="form-check-f">
+                                            <input class="form-check-input" type="checkbox" name="subcategories[]" 
+                                                value="{{ $subcategory->id }}" id="subcategory-{{ $subcategory->id }}" 
+                                                @if(in_array($subcategory->id, request('subcategories', []))) checked @endif>
+                                            <label class="form-check-label" for="subcategory-{{ $subcategory->id }}">
+                                                {{ $subcategory->name }}
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                @endif
+                            </div>
+                        </div>
+
+
+                    </div>
+                </form>
+            </div>
             
-            <div class="col-12">
+            <div class="col-md-8 col-lg-9">
                 <div class="product_inner">
                     <div class="Short_by">
                         <div class="d-flex">
@@ -547,41 +314,8 @@
     <!-- JavaScript -->
     @push('script')
 
+
         <script>
-            // Bubble Filter Toggle Function
-            function toggleBubbleFilter(element, inputName, value) {
-                const checkbox = element.querySelector('input[type="checkbox"]');
-                const isSelected = element.classList.contains('selected');
-                
-                if (isSelected) {
-                    element.classList.remove('selected');
-                    checkbox.checked = false;
-                } else {
-                    element.classList.add('selected');
-                    checkbox.checked = true;
-                }
-                
-                // Trigger change event to update filters
-                $(checkbox).trigger('change');
-            }
-
-            // Subcategory Bubble Toggle Function
-            function toggleSubcategoryBubble(element, value) {
-                const checkbox = element.querySelector('input[type="checkbox"]');
-                const isSelected = element.classList.contains('selected');
-                
-                if (isSelected) {
-                    element.classList.remove('selected');
-                    checkbox.checked = false;
-                } else {
-                    element.classList.add('selected');
-                    checkbox.checked = true;
-                }
-                
-                // Trigger form submission
-                submitForm();
-            }
-
             function filterProducts() {
                 const filterValue = document.getElementById('filterSelect').value;
                 const productCards = document.querySelectorAll('#productTable .product-card');
@@ -603,6 +337,15 @@
             }
 
         </script>
+        {{-- <script>
+            // Add event listeners to the checkboxes to submit the form on change
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    // Trigger the form submission when a checkbox is clicked
+                    document.getElementById('filter-form').submit();
+                });
+            });
+        </script> --}}
 
         <script>
         $(document).ready(function () {
@@ -624,7 +367,12 @@
                 }
             });
 
-            // Initially hide category and subcategory containers (they have 'hidden' class by default)
+            let categoryContainer = document.getElementById("categories-container");
+            let subcategoryContainer = document.getElementById("subcategories-container");
+
+            // Initially hide category and subcategory containers
+            categoryContainer.style.display = "none";
+            subcategoryContainer.style.display = "none";
 
             // Check URL path for brand ID (header dropdown selection)
             let pathBrandId = "{{ request('id') }}";
@@ -658,8 +406,8 @@
                     $('input[name="categories[]"]').prop('checked', false);
                     $('input[name="subcategories[]"]').prop('checked', false);
                     
-                    document.getElementById("categories-section").classList.add("hidden");
-                    document.getElementById("subcategories-section").classList.add("hidden");
+                    categoryContainer.style.display = "none";
+                    subcategoryContainer.style.display = "none";
                     
                     // Clear the selected arrays
                     selectedCategories = [];
@@ -681,33 +429,26 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    const categoriesGrid = document.getElementById("categories-container");
-                    const categoriesSection = document.getElementById("categories-section");
-                    categoriesGrid.innerHTML = ""; 
+                    categoryContainer.innerHTML = ""; 
                     if (data.categories.length > 0) {
-                        categoriesSection.classList.remove("hidden");
+                        let categoryHtml = `<h4>فئات</h4>`;
+                        categoryContainer.style.display = "block";
                         
                         data.categories.forEach(category => {
                             let checked = selectedCategories.includes(category.id.toString()) ? "checked" : "";
-                            let selectedClass = checked ? "selected" : "";
-                            
-                            let categoryHtml = `
-                                <div class="bubble-filter ${selectedClass}" 
-                                     onclick="toggleBubbleFilter(this, 'categories[]', '${category.id}')">
-                                    <input type="checkbox" name="categories[]" value="${category.id}" 
-                                           id="category-${category.id}" ${checked}>
-                                    <img src="{{asset('uploads/Category')}}/${category.image}" 
-                                         alt="${category.name}" class="bubble-image">
-                                    <span class="bubble-text">${category.name}</span>
-                                    <div class="bubble-selected-badge">
-                                        <i class="fas fa-check"></i>
-                                    </div>
+                            categoryHtml += `
+                                <div class="form-check-f">
+                                    <input class="form-check-input category-checkbox" type="checkbox" name="categories[]" 
+                                        value="${category.id}" id="category-${category.id}" ${checked}>
+                                    <label class="form-check-label" for="category-${category.id}">
+                                        ${category.name}
+                                    </label>
                                 </div>`;
-                            categoriesGrid.innerHTML += categoryHtml;
                         });
+                        categoryContainer.innerHTML = categoryHtml;
 
                         // Add event listeners to category checkboxes
-                        document.querySelectorAll('input[name="categories[]"]').forEach(catCheckbox => {
+                        document.querySelectorAll('.category-checkbox').forEach(catCheckbox => {
                             catCheckbox.addEventListener('change', function () {
                                 let selectedCats = [];
                                 $('input[name="categories[]"]:checked').each(function () {
@@ -717,7 +458,7 @@
                                 if (selectedCats.length > 0) {
                                     fetchSubcategories(selectedCats, selectedSubCategories);
                                 } else {
-                                    document.getElementById("subcategories-section").classList.add("hidden");
+                                    subcategoryContainer.style.display = "none";
                                 }
 
                                 submitForm();
@@ -729,8 +470,8 @@
                             fetchSubcategories(selectedCategories, selectedSubCategories);
                         }
                     } else {
-                        categoriesSection.classList.add("hidden");
-                        document.getElementById("subcategories-section").classList.add("hidden");
+                        categoryContainer.style.display = "none";
+                        subcategoryContainer.style.display = "none";
                     }
                 })
                 .catch(error => console.log(error));
@@ -748,31 +489,32 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    const subcategoriesList = document.getElementById("subcategories-container");
-                    const subcategoriesSection = document.getElementById("subcategories-section");
-                    subcategoriesList.innerHTML = "";
+                    subcategoryContainer.innerHTML = "";
                     if (data.subcategories.length > 0) {
-                        subcategoriesSection.classList.remove("hidden");
+                        let subcategoryHtml = `<h4>Sub Category</h4>`;
+                        subcategoryContainer.style.display = "block";
                         
                         data.subcategories.forEach(subcategory => {
                             let checked = selectedSubCategories.includes(subcategory.id.toString()) ? "checked" : "";
-                            let selectedClass = checked ? "selected" : "";
-                            let subcategoryHtml = `
-                                <div class="subcategory-bubble ${selectedClass}" onclick="toggleSubcategoryBubble(this, '${subcategory.id}')">
-                                    <input type="checkbox" name="subcategories[]" value="${subcategory.id}" id="subcategory-${subcategory.id}" ${checked}>
-                                    ${subcategory.name}
+                            subcategoryHtml += `
+                                <div class="form-check-f">
+                                    <input class="form-check-input subcategory-checkbox" type="checkbox" name="subcategories[]" 
+                                        value="${subcategory.id}" id="subcategory-${subcategory.id}" ${checked}>
+                                    <label class="form-check-label" for="subcategory-${subcategory.id}">
+                                        ${subcategory.name}
+                                    </label>
                                 </div>`;
-                            subcategoriesList.innerHTML += subcategoryHtml;
                         });
+                        subcategoryContainer.innerHTML = subcategoryHtml;
 
                         // Add event listeners to subcategory checkboxes
-                        document.querySelectorAll('.subcategory-bubble').forEach(subCheckbox => {
+                        document.querySelectorAll('.subcategory-checkbox').forEach(subCheckbox => {
                             subCheckbox.addEventListener('change', function () {
                                 submitForm();
                             });
                         });
                     } else {
-                        subcategoriesSection.classList.add("hidden");
+                        subcategoryContainer.style.display = "none";
                     }
                 })
                 .catch(error => console.log(error));

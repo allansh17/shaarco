@@ -75,8 +75,7 @@ class HomeController extends Controller
             ->limit(2)
             ->get();
         $categorys = Category::all();
-        $subcategories = SubCategory::all();
-        return view('stc_products.index', compact('ads','sliders', 'brands', 'products', 'categorys', 'mostproducts', 'subcategories'));
+        return view('stc_products.index', compact('ads','sliders', 'brands', 'products', 'categorys', 'mostproducts'));
     }
 
     public function productdetails($id)
