@@ -472,7 +472,7 @@
                             stroke="#191C1F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </div>
-                <div class="ad_text">
+                <div class="feature_text">
                     <h4>دعم 24/7</h4>
                     <p>الاتصال المباشر/الرسالة</p>
                     <p>00970592350011</p>
@@ -495,7 +495,7 @@
                     </svg>
 
                 </div>
-                <div class="ad_text">
+                <div class="feature_text">
                     <h4>الدفع الآمن</h4>
                     <p>أموالك في أمان</p>
                     <p>الدفع باستخدام الفيزا أو الدفع عند الاستلام</p>
@@ -521,7 +521,7 @@
                     </svg>
 
                 </div>
-                <div class="ad_text">
+                <div class="feature_text">
                     <h4>إرجاع خلال 24 ساعة</h4>
                     <p>ضمان استرداد الأموال بنسبة 100%</p>
                     <p>أفضل الجودة والضمان</p>
@@ -543,7 +543,7 @@
                     </svg>
 
                 </div>
-                <div class="ad_text">
+                <div class="feature_text">
                     <h4>أسرع توصيل</h4>
                     <p>التوصيل خلال 24 ساعة</p>
                 </div>
