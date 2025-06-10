@@ -67,7 +67,10 @@ class CategoryController extends Controller
         foreach ($data as $value) {
             $row['id'] = $start + $i;
             $row['name'] = ucfirst($value->name);
-  $row['brand'] = $value->brand_name ?? 'N/A'; 
+            
+            // Display multiple brands as comma-separated list
+            $brandNames = $value->brands->pluck('name')->toArray();
+            $row['brands'] = !empty($brandNames) ? implode(', ', $brandNames) : 'N/A'; 
             $val = '';
             if (auth()->user()->can('master_edit_faqs')) {
                 $val .= '<label class="switch">
@@ -120,25 +123,20 @@ class CategoryController extends Controller
 
     public function getData($search = null, $orderby = null, $order = null, $request = null)
     {
-      $q = Category::where('category.id', '!=', '0')
-        ->leftJoin('brands', 'category.brands', '=', 'brands.id')
-        ->select('category.*', 'brands.name as brand_name'); // Fetch brand name
-        // print_r($q);die;
-        $orderby = $orderby ? $orderby : 'created_at';
-        $order = $order ? $order : 'desc';
+        $q = Category::where('id', '!=', '0')->with('brands');
+        
+        $orderby = $orderby ?: 'created_at';
+        $order = $order ?: 'desc';
 
-       $orderby = $orderby ?: 'category.created_at';
-    $order = $order ?: 'desc';
-
-    if ($search && !empty($search)) {
-        $q->where('category.name', 'LIKE', '%' . $search . '%');
-    }
-    if (!empty($request['status'])) {
-        $q->where('category.status', $request['status']);
-    }
-    if (!empty($request['name'])) {
-        $q->where('category.name', 'LIKE', '%' . $request['name'] . '%');
-    }
+        if ($search && !empty($search)) {
+            $q->where('name', 'LIKE', '%' . $search . '%');
+        }
+        if (!empty($request['status'])) {
+            $q->where('status', $request['status']);
+        }
+        if (!empty($request['name'])) {
+            $q->where('name', 'LIKE', '%' . $request['name'] . '%');
+        }
 
         $response = $q->orderBy($orderby, $order);
         return $response;
@@ -151,7 +149,8 @@ class CategoryController extends Controller
 
         $rules = [
             'name' => 'required|string|alpha',
-            // 'subcategory' => 'nullable|string',
+            'brands' => 'required|array|min:1',
+            'brands.*' => 'exists:brands,id',
             'image' => 'required|image|mimes:jpg,jpeg,png',
 
         ];
@@ -179,11 +178,10 @@ class CategoryController extends Controller
             //if id found then update else insert
             if (isset($request->id) && $request->id > 0) {
                 //update
-                $brandid= Brands::find($request->brands);
                 $item = Category::find($request->id);
                 $item->name = $request->name;
                 $item->slug = Str::slug($request->name);
-                $item->brands = $brandid->id;
+                
                 if ($profile_image = $request->file('image')) {
                     $destination_path = 'uploads/Category';
                     $source_path = $profile_image;
@@ -192,6 +190,10 @@ class CategoryController extends Controller
                 }
 
                 $item->save();
+                
+                // Sync brands (remove old relationships and add new ones)
+                $item->brands()->sync($request->brands);
+                
                 if ($item) {
                     $res = array('code' => 200, 'msg' => 'Updated successfully');
                 } else {
@@ -199,23 +201,23 @@ class CategoryController extends Controller
                 }
             } else {
                 //store
-                 $brandid= Brands::find($request->brands);
                 $item = new Category;
                 $item->name = $request->name;
                 $item->slug = Str::slug($request->name);
-                // $item->brands = Brands::find($request->id);
-                   $item->brands = $brandid->id;
+                
                 if ($profile_image = $request->file('image')) {
                     $destination_path = 'uploads/Category';
                     $source_path = $profile_image;
                     $file_name = image_upload_public($source_path, $destination_path);
-                    // dd($file_name);
-                    
                     $item->image = $file_name;
                 }
                 $item->status = '2';
 
                 $item->save();
+                
+                // Attach brands to category
+                $item->brands()->attach($request->brands);
+                
                 if ($item) {
                     $res = array('code' => 200, 'msg' => 'Added successfully');
                 } else {
@@ -232,9 +234,11 @@ class CategoryController extends Controller
     public function get_by_id(Request $request)
     {
         try {
-            $item = Category::find($request->id);
-            //   echo "<pre>";
-            //   print_r($item) ; die ;
+            $item = Category::with('brands')->find($request->id);
+            
+            // Add brand IDs array for the frontend
+            $item->brand_ids = $item->brands->pluck('id')->toArray();
+            
             $res = array('code' => 200, 'data' => $item);
         } catch (\Exception $e) {
             $res = array('code' => 201, 'msg' => 'Something went wrong! Try again');
@@ -329,13 +333,27 @@ class CategoryController extends Controller
   //       return response()->json(['categories' => $categoryfetch]);
   //   }
     public function fetchCategories(Request $request)
-{
-    $brands = $request->brands;
-    $categories = Category::whereIn('brands', $brands)->get(); // Fetch categories based on selected brands
+    {
+        $brands = $request->brands;
+        
+        // Fetch categories that have any of the selected brands using the many-to-many relationship
+        $categories = Category::whereHas('brands', function($query) use ($brands) {
+            $query->whereIn('brand_id', $brands);
+        })->get();
 
-    return response()->json(['categories' => $categories]);
-}
+        return response()->json(['categories' => $categories]);
+    }
 
+    public function fetchBrands(Request $request)
+    {
+        $categories = $request->categories;
+        
+        // Fetch brands that belong to any of the selected categories using the many-to-many relationship
+        $brands = Brands::whereHas('categories', function($query) use ($categories) {
+            $query->whereIn('category_id', $categories);
+        })->get();
 
+        return response()->json(['brands' => $brands]);
+    }
 
 };

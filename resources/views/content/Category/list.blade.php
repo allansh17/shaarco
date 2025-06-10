@@ -1,5 +1,10 @@
 @extends('layouts/contentNavbarLayout')
 @section('title', 'Category Management')
+
+@push('styles')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+@endpush
+
 @section('content')
 <div class="row">
     <div class="col-md-12">
@@ -39,6 +44,7 @@
                             <tr>
                                 <th>{{ __('##')}}</th>
                                 <th>{{ __('Name')}}</th>
+                                <th>{{ __('Brands')}}</th>
                                 <th>{{ __('Image')}}</th>
                                 <th>{{ __('Status')}}</th>
                                 <th>{{ __('Created at')}}</th>
@@ -80,13 +86,13 @@
                     <div class="col-sm-12">
                         <div class="mb-3 fv-plugins-icon-container">
                             <label class="form-label" for="question">Brands<span class="text-danger">*</span></label>
-                            <select class="form-control form-select" id="brands" name="brands">
-                                    <option value="" selected disabled>Select Brands</option>
+                            <select class="form-control form-select select2-brands" id="brands" name="brands[]" multiple>
                                     @foreach($brands as $brands_data)
-                                        <option value="{{$brands_data->id}}" {{ isset($product_detail) && $product_detail->brands == $brands_data->id ? 'selected' : '' }}>
+                                        <option value="{{$brands_data->id}}">
                                             {{$brands_data->name}}</option>
                                     @endforeach
                                 </select>
+                            <small class="text-muted">Select one or more brands for this category</small>
                         </div>
                     </div>
 
@@ -189,27 +195,34 @@
                     },
                     {
                         targets: 2,
+                        data: 'brands',
+                        name: 'brands',
+                        orderable: false,
+
+                    },
+                    {
+                        targets: 3,
                         data: 'image',
                         name: 'image',
                         orderable: false,
 
                     },
                     {
-                        targets: 3,
+                        targets: 4,
                         data: 'status',
                         name: 'status',
                         orderable: false,
                         searchable: false
                     },
                     {
-                        targets: 4,
+                        targets: 5,
                         data: 'created_at',
                         name: 'created_at'
 
                     },
                     //only those have manage_user permission will get access
                     {
-                        targets: 5,
+                        targets: 6,
                         data: 'action',
                         name: 'action',
                         orderable: false,
@@ -218,7 +231,7 @@
                     ],
                     "aoColumnDefs": [{
                         "bSortable": false,
-                        'aTargets': [-1, 3]
+                        'aTargets': [-1, 4]
                     },],
                     order: [
                         [0, 'desc']
@@ -261,6 +274,8 @@
                 $('#offcanvasAddUserLabel').text('Add');
                 $("#addEditModal").find("#existing-image").hide();
 
+                // Clear brands selection
+                $('#brands').val(null).trigger('change');
 
                 $("#addEditModal").find(".modal-title").text('Add');
                 //put id zero in case of add new item
@@ -299,6 +314,14 @@
                             $("#addEditModal").find("input[name='id']").val(item.id);
                             $("#addEditModal").find("input[name='name']").val(item.name);
                             $("#addEditModal").find("input[name='slug']").val(item.slug);
+                            
+                            // Set selected brands (expecting item.brand_ids as array)
+                            if (item.brand_ids && item.brand_ids.length > 0) {
+                                $('#brands').val(item.brand_ids).trigger('change');
+                            } else {
+                                $('#brands').val(null).trigger('change');
+                            }
+                            
                             //    $("#addEditModal").find("input[name='image']").val(item.image);
                             $("#addEditModal").find("#existing-image").attr("src", 'uploads/Category/' + item.image);
                             var imageUrl = item.image ? 'uploads/Category/' + item.image : 'uploads/default_image/default.png';
@@ -349,6 +372,10 @@
                     name: {
                         required: true,
 
+                    },
+                    'brands[]': {
+                        required: true,
+                        minlength: 1
                     },
                 },
                 messages: {},
@@ -540,5 +567,18 @@
 
         <!-- <script src="//cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script> -->
         <script src="{{ asset('plugins/ckeditor/ckeditor.js') }}"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        
+        <script>
+            $(document).ready(function() {
+                // Initialize Select2 for brands dropdown
+                $('#brands').select2({
+                    placeholder: "Select Brands",
+                    allowClear: true,
+                    width: '100%',
+                    dropdownParent: $('#addEditModal')
+                });
+            });
+        </script>
     @endpush
     @endsection

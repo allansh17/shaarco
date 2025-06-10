@@ -105,17 +105,32 @@
 </div>
 
 <div class="col-sm-6 mt-2">
-    <label class="form-label" for="category">Categories<span class="text-danger">*</span></label>
+    <label class="form-label" for="category">Categories<span class="text-danger">*</span> <small class="text-muted">(select brand first)</small></label>
     <select class="form-control select2-category" id="category" name="category[]" multiple="multiple">
         @if(isset($product_detail))
+            @php
+                $selectedCategoryIds = explode(',', $product_detail->category_id);
+            @endphp
             @foreach($category as $category_data)
-                @if($category_data->brands == $product_detail->brands)
+                @php
+                    // Check if this category has the selected brand
+                    $hasSelectedBrand = $category_data->brands->contains('id', $product_detail->brands);
+                    // Check if this category is currently selected for this product
+                    $isCurrentlySelected = in_array($category_data->id, $selectedCategoryIds);
+                @endphp
+                @if($hasSelectedBrand || $isCurrentlySelected)
                     <option value="{{$category_data->id}}" 
-                        {{ in_array($category_data->id, explode(',', $product_detail->category_id)) ? 'selected' : '' }}>
+                        {{ $isCurrentlySelected ? 'selected' : '' }}>
                         {{$category_data->name}}
+                        @if($isCurrentlySelected && !$hasSelectedBrand)
+                            (currently selected)
+                        @endif
                     </option>
                 @endif
             @endforeach
+        @else
+            {{-- For new products, categories will be loaded dynamically via JavaScript when brand is selected --}}
+            <option value="" disabled>Please select a brand first</option>
         @endif
     </select>
     <div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback"></div>
@@ -2757,15 +2772,7 @@
 
 <script>
     $(document).ready(function() {
-        // Select2 for Categories
-        $('.select2-category').select2({
-            placeholder: "Select Category",
-            closeOnSelect: false,
-            tags: false, 
-            allowClear: true
-        });
-
-        // Select2 for Subcategories
+        // Initialize Select2 for Subcategories
         $('.select2-subcategory').select2({
             placeholder: "Select Subcategory",
             closeOnSelect: false,
@@ -2773,8 +2780,10 @@
             allowClear: true
         });
 
-        // Ensure individual remove works
-        $('.select2-category, .select2-subcategory').on("select2:unselect", function (e) {
+        // Note: Select2 for categories is handled in the brand selection script below
+        
+        // Ensure individual remove works for subcategories
+        $('.select2-subcategory').on("select2:unselect", function (e) {
             $(this).trigger('change');
         });
     });
@@ -2944,35 +2953,108 @@ let editorInstance;
 
 </script>
 <script type="text/javascript">
-//   $(document).ready(function () {
+$(document).ready(function () {
     var categorySelect = $('#category');
+    var isSelect2Initialized = false;
+    var isEditingProduct = {{ isset($product_detail) ? 'true' : 'false' }};
 
-    // If no brand is selected initially, clear category dropdown
-    if ($('#brands').val() === null) {
-        categorySelect.empty().append('<option value="" disabled selected>Select Categories</option>');
+    // Function to initialize Select2 for categories
+    function initializeCategorySelect2() {
+        if (!isSelect2Initialized) {
+            categorySelect.select2({
+                placeholder: "Select Categories",
+                closeOnSelect: false,
+                tags: false, 
+                allowClear: true
+            });
+            isSelect2Initialized = true;
+        }
     }
 
-    $('#brands').on('change', function () {
-        var brand_id = $(this).val(); // Get selected brand ID
-        categorySelect.empty().append('<option value="" disabled>Select Categories</option>'); // Reset dropdown
-
+    // Function to load categories based on brand ID
+    function loadCategoriesByBrand(brand_id) {
         if (brand_id) {
+            // Clear existing options
+            categorySelect.empty();
+            categorySelect.append('<option value="" disabled>Loading categories...</option>');
+            
+            // Update Select2 if initialized
+            if (isSelect2Initialized) {
+                categorySelect.trigger('change');
+            }
+            
             $.ajax({
                 url: "{{ route('get.categories.by.brand') }}", // Laravel route
                 type: "GET",
                 data: { brand_id: brand_id },
                 success: function (response) {
-                    if (response.status) {
+                    categorySelect.empty(); // Clear loading message
+                    
+                    if (response.status && response.categories.length > 0) {
                         $.each(response.categories, function (key, value) {
                             categorySelect.append('<option value="' + value.id + '">' + value.name + '</option>');
                         });
+                    } else {
+                        categorySelect.append('<option value="" disabled>No categories available for this brand</option>');
                     }
-                    categorySelect.trigger('change'); // Update Select2 UI
+                    
+                    // Initialize Select2 if not already done
+                    initializeCategorySelect2();
+                    
+                    // Update Select2 UI
+                    categorySelect.trigger('change');
+                },
+                error: function() {
+                    categorySelect.empty();
+                    categorySelect.append('<option value="" disabled>Error loading categories</option>');
+                    
+                    // Initialize Select2 if not already done
+                    initializeCategorySelect2();
+                    
+                    categorySelect.trigger('change');
                 }
             });
+        } else {
+            categorySelect.empty();
+            categorySelect.append('<option value="" disabled>Please select a brand first</option>');
+            
+            // Initialize Select2 if not already done
+            initializeCategorySelect2();
+            
+            categorySelect.trigger('change');
         }
+    }
+
+    // Handle different scenarios
+    if (isEditingProduct) {
+        // For editing products: Just initialize Select2 without making AJAX calls
+        // The server-side rendered options will remain intact
+        initializeCategorySelect2();
+    } else {
+        // For new products: Load categories dynamically based on brand selection
+        var initialBrandId = $('#brands').val();
+        if (initialBrandId && initialBrandId !== '' && initialBrandId !== null) {
+            loadCategoriesByBrand(initialBrandId);
+        } else {
+            // Initialize with default message
+            categorySelect.empty();
+            categorySelect.append('<option value="" disabled>Please select a brand first</option>');
+            initializeCategorySelect2();
+        }
+    }
+
+    // Handle brand selection change
+    $('#brands').on('change', function () {
+        var brand_id = $(this).val();
+        // For editing products, also load new categories when brand changes
+        loadCategoriesByBrand(brand_id);
     });
-// });
+
+    // Ensure individual remove works for categories
+    categorySelect.on("select2:unselect", function (e) {
+        $(this).trigger('change');
+    });
+});
 
 </script>
 @endpush

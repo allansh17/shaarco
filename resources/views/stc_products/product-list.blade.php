@@ -68,17 +68,9 @@
 
                         <!-- Category Filters -->
                         <div class="select_filter">
-                              <div id="categories-container">
+                              <div id="categories-container" style="display: none;">
                             <h4>فئات</h4>
-                            @foreach ($brands as $category)
-                                <div class="form-check-f">
-                                    <input class="form-check-input" type="checkbox" name="categories[]"
-                                        value="{{ $category->id }}" id="category-{{ $category->id }}"
-                                        @if(in_array($category->id, $selectedBrands)) checked @endif>
-                                    <label class="form-check-label"
-                                        for="category-{{ $category->id }}">{{ $category->name }}</label>
-                                </div>
-                            @endforeach
+                            <!-- Categories will be dynamically loaded based on selected brands -->
                              </div>
                         </div>
 
@@ -356,394 +348,189 @@
         </script> --}}
 
         <script>
-       $(document).ready(function () {
-    let urlParams = new URLSearchParams(window.location.search);
-    let selectedBrands = [];
-    let selectedCategories = [];
-    let selectedSubCategories = [];
+        $(document).ready(function () {
+            let urlParams = new URLSearchParams(window.location.search);
+            let selectedBrands = [];
+            let selectedCategories = [];
+            let selectedSubCategories = [];
 
-    // URL se selected brands, categories, subcategories extract karna
-    urlParams.forEach((value, key) => {
-        if (key.startsWith("brands")) {
-            selectedBrands.push(value);
-        }
-        if (key.startsWith("categories")) {
-            selectedCategories.push(value);
-        }
-        if (key.startsWith("subcategories")) {
-            selectedSubCategories.push(value);
-        }
-    });
+            // Extract URL parameters
+            urlParams.forEach((value, key) => {
+                if (key.startsWith("brands")) {
+                    selectedBrands.push(value);
+                }
+                if (key.startsWith("categories")) {
+                    selectedCategories.push(value);
+                }
+                if (key.startsWith("subcategories")) {
+                    selectedSubCategories.push(value);
+                }
+            });
 
-    let categoryContainer = document.getElementById("categories-container");
-    let subcategoryContainer = document.getElementById("subcategories-container");
+            let categoryContainer = document.getElementById("categories-container");
+            let subcategoryContainer = document.getElementById("subcategories-container");
 
-    categoryContainer.style.display = "none";
-    subcategoryContainer.style.display = "none";
-
-    if (selectedBrands.length > 0) {
-        fetchCategories(selectedBrands, selectedCategories);
-    }
-
-    // 🟢 **Header Dropdown Brand Selection Logic**
-    let selectedBrandId = "{{ request('id') }}"; // Header dropdown se selected brand ID
-    if (selectedBrandId && !selectedBrands.includes(selectedBrandId)) {
-        selectedBrands.push(selectedBrandId);
-        fetchCategories(selectedBrands, selectedCategories); // ✅ Category list update
-    }
-
-    // ✅ Auto-check corresponding brand checkboxes
-    $('input[name="brands[]"]').each(function () {
-        if (selectedBrands.includes($(this).val())) {
-            $(this).prop("checked", true);
-        }
-    });
-
-    // ✅ Header Dropdown Click Event
-    $(".brand-dropdown").click(function (e) {
-        e.preventDefault();
-        let brandId = $(this).data("id");
-
-        let newUrl = new URL(window.location.href);
-        newUrl.searchParams.set("brands[]", brandId);
-
-        window.location.href = newUrl.toString();
-    });
-
-    // ✅ Brand Filter Checkbox Event
-    $('input[name="brands[]"]').change(function () {
-        selectedBrands = [];
-        $('input[name="brands[]"]:checked').each(function () {
-            selectedBrands.push($(this).val());
-        });
-
-        if (selectedBrands.length > 0) {
-            fetchCategories(selectedBrands, selectedCategories); // ✅ Brand select hote hi categories fetch
-        } else {
+            // Initially hide category and subcategory containers
             categoryContainer.style.display = "none";
             subcategoryContainer.style.display = "none";
-        }
 
-        submitForm(); // Form auto-submit
-    });
+            // Check URL path for brand ID (header dropdown selection)
+            let pathBrandId = "{{ request('id') }}";
+            if (pathBrandId && !selectedBrands.includes(pathBrandId)) {
+                selectedBrands.push(pathBrandId);
+            }
 
-    function fetchCategories(brands, selectedCategories) {
-        fetch("{{ route('fetch.categories') }}", {
-            method: "POST",
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ brands: brands })
-        })
-        .then(response => response.json())
-        .then(data => {
-            categoryContainer.innerHTML = ""; 
-            if (data.categories.length > 0) {
-                let checkbox = `<h4>فئات</h4>`;
-                categoryContainer.style.display = "block";
-                data.categories.forEach(category => {
-                    let checked = selectedCategories.includes(category.id.toString()) ? "checked" : "";
-                    checkbox += `
-                        <div class="form-check-f">
-                            <input class="form-check-input category-checkbox" type="checkbox" name="categories[]" 
-                                value="${category.id}" id="category-${category.id}" ${checked}>
-                            <label class="form-check-label" for="category-${category.id}">
-                                ${category.name}
-                            </label>
-                        </div>`;
+            // Check corresponding brand checkboxes based on URL
+            $('input[name="brands[]"]').each(function () {
+                if (selectedBrands.includes($(this).val()) || $(this).val() === pathBrandId) {
+                    $(this).prop("checked", true);
+                }
+            });
+
+            // If brands are selected, fetch categories
+            if (selectedBrands.length > 0) {
+                fetchCategories(selectedBrands, selectedCategories);
+            }
+
+            // Brand checkbox change event
+            $('input[name="brands[]"]').change(function () {
+                selectedBrands = [];
+                $('input[name="brands[]"]:checked').each(function () {
+                    selectedBrands.push($(this).val());
                 });
-                categoryContainer.innerHTML += checkbox;
 
-                document.querySelectorAll('.category-checkbox').forEach(catCheckbox => {
-                    catCheckbox.addEventListener('change', function () {
-                        let selectedCategories = [];
-                        $('input[name="categories[]"]:checked').each(function () {
-                            selectedCategories.push($(this).val());
+                if (selectedBrands.length > 0) {
+                    fetchCategories(selectedBrands, selectedCategories);
+                } else {
+                    // Clear category and subcategory selections when no brands are selected
+                    $('input[name="categories[]"]').prop('checked', false);
+                    $('input[name="subcategories[]"]').prop('checked', false);
+                    
+                    categoryContainer.style.display = "none";
+                    subcategoryContainer.style.display = "none";
+                    
+                    // Clear the selected arrays
+                    selectedCategories = [];
+                    selectedSubCategories = [];
+                }
+
+                submitForm();
+            });
+
+            // Function to fetch categories based on selected brands
+            function fetchCategories(brands, selectedCategories) {
+                fetch("{{ route('fetch.categories') }}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ brands: brands })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    categoryContainer.innerHTML = ""; 
+                    if (data.categories.length > 0) {
+                        let categoryHtml = `<h4>فئات</h4>`;
+                        categoryContainer.style.display = "block";
+                        
+                        data.categories.forEach(category => {
+                            let checked = selectedCategories.includes(category.id.toString()) ? "checked" : "";
+                            categoryHtml += `
+                                <div class="form-check-f">
+                                    <input class="form-check-input category-checkbox" type="checkbox" name="categories[]" 
+                                        value="${category.id}" id="category-${category.id}" ${checked}>
+                                    <label class="form-check-label" for="category-${category.id}">
+                                        ${category.name}
+                                    </label>
+                                </div>`;
+                        });
+                        categoryContainer.innerHTML = categoryHtml;
+
+                        // Add event listeners to category checkboxes
+                        document.querySelectorAll('.category-checkbox').forEach(catCheckbox => {
+                            catCheckbox.addEventListener('change', function () {
+                                let selectedCats = [];
+                                $('input[name="categories[]"]:checked').each(function () {
+                                    selectedCats.push($(this).val());
+                                });
+
+                                if (selectedCats.length > 0) {
+                                    fetchSubcategories(selectedCats, selectedSubCategories);
+                                } else {
+                                    subcategoryContainer.style.display = "none";
+                                }
+
+                                submitForm();
+                            });
                         });
 
+                        // If categories are already selected, fetch subcategories
                         if (selectedCategories.length > 0) {
                             fetchSubcategories(selectedCategories, selectedSubCategories);
-                        } else {
-                            subcategoryContainer.style.display = "none";
                         }
-
-                        submitForm(); // Form auto-submit
-                    });
-                });
-
-                if (selectedCategories.length > 0) {
-                    fetchSubcategories(selectedCategories, selectedSubCategories);
-                }
-            } else {
-                categoryContainer.style.display = "none";
-                subcategoryContainer.style.display = "none";
+                    } else {
+                        categoryContainer.style.display = "none";
+                        subcategoryContainer.style.display = "none";
+                    }
+                })
+                .catch(error => console.log(error));
             }
-        })
-        .catch(error => console.log(error));
-    }
 
-    function fetchSubcategories(categories, selectedSubCategories) {
-        fetch("{{ route('fetch.subcategories') }}", {
-            method: "POST",
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ categories: categories })
-        })
-        .then(response => response.json())
-        .then(data => {
-            subcategoryContainer.innerHTML = "";
-            if (data.subcategories.length > 0) {
-                let checkbox = `<h4>Sub Category</h4>`;
-                subcategoryContainer.style.display = "block";
-                data.subcategories.forEach(subcategory => {
-                    let checked = selectedSubCategories.includes(subcategory.id.toString()) ? "checked" : "";
-                    checkbox += `
-                        <div class="form-check-f">
-                            <input class="form-check-input subcategory-checkbox" type="checkbox" name="subcategories[]" 
-                                value="${subcategory.id}" id="subcategory-${subcategory.id}" ${checked}>
-                            <label class="form-check-label" for="subcategory-${subcategory.id}">
-                                ${subcategory.name}
-                            </label>
-                        </div>`;
-                });
-                subcategoryContainer.innerHTML += checkbox;
-
-                document.querySelectorAll('.subcategory-checkbox').forEach(subCheckbox => {
-                    subCheckbox.addEventListener('change', function () {
-                        submitForm(); // Form auto-submit
-                    });
-                });
-            } else {
-                subcategoryContainer.style.display = "none";
-            }
-        })
-        .catch(error => console.log(error));
-    }
-
-    // ✅ Form Auto-Submit Function
-    function submitForm() {
-        $("#filter-form").submit();
-    }
-
-    // ✅ Category or Subcategory Change → Auto Submit Form
-    $(document).on("change", 'input[name="categories[]"], input[name="subcategories[]"]', function () {
-        submitForm();
-    });
-});
-
-</script>
-<!-- <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        let selectedBrandId = null;
-
-        // ✅ 1. Extract ID from URL Path (e.g., /product-list/8)
-        const pathParts = window.location.pathname.split("/");
-        if (pathParts.length > 2 && !isNaN(pathParts[pathParts.length - 1])) {
-            selectedBrandId = pathParts[pathParts.length - 1];
-        }
-
-        // ✅ 2. Extract ID from Query String (e.g., ?brands[]=8)
-        const urlParams = new URLSearchParams(window.location.search);
-        let selectedBrands = [];
-        urlParams.forEach((value, key) => {
-            if (key.startsWith("brands")) {
-                selectedBrands.push(value);
-            }
-        });
-
-        console.log("Selected Brand ID:", selectedBrandId);
-        console.log("Selected Brands from Query:", selectedBrands);
-
-        // ✅ 3. Check the corresponding checkbox
-        if (selectedBrandId) {
-            let checkbox = document.getElementById(`brand-${selectedBrandId}`);
-            if (checkbox) {
-                checkbox.checked = true;
-                console.log("Checkbox Checked:", checkbox);
-            }
-        }
-
-        // ✅ 4. Show Categories If a Brand is Selected
-        let categoryContainer = document.getElementById("categories-container");
-        if (selectedBrands.length > 0 || selectedBrandId) {
-            categoryContainer.style.display = "block"; // Show categories
-        } else {
-            categoryContainer.style.display = "none"; // Hide categories
-        }
-
-        // ✅ 5. Checkbox Click Event: Show Categories & Submit Form
-        document.querySelectorAll('input[name="brands[]"]').forEach(checkbox => {
-            checkbox.addEventListener("change", function () {
-                let selected = Array.from(document.querySelectorAll('input[name="brands[]"]:checked')).map(cb => cb.value);
-                if (selected.length > 0) {
-                    categoryContainer.style.display = "block"; // Show categories
-                } else {
-                    categoryContainer.style.display = "none"; // Hide categories
-                }
-
-                document.getElementById("filter-form").submit(); // Auto-submit form
-            });
-        });
-    });
-</script>
- -->
-
-
-
-
-        
-      <!--   <script>
-$(document).ready(function () {
-    let urlParams = new URLSearchParams(window.location.search);
-    let selectedCategories = [];
-    let selectedsubCategories = [];
-
-    // Extracting categories from the URL correctly
-    urlParams.forEach((value, key) => {
-        if (key.startsWith("categories")) {
-            selectedCategories.push(value);
-        }
-    });
-
-    let subcategoryContainer = document.getElementById("subcategories-container");
-
-    if (selectedCategories.length > 0) {
-        fetchSubcategories(selectedCategories);
-    }
-    urlParams.forEach((value, key) => {
-        if (key.startsWith("subcategories")) {
-            selectedsubCategories.push(value);
-        }
-    });
-    // console.log(selectedsubCategories);
-    // Function to fetch subcategories
-    function fetchSubcategories(categories) {
-        fetch("{{ route('fetch.subcategories') }}", {
-            method: "POST",
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ categories: categories })
-        })
-        .then(response => response.json())
-        .then(data => {
-            subcategoryContainer.innerHTML = ""; // Clear old subcategories
-            if (data.subcategories.length > 0) {
-                let checkbox = `<h4>Sub Category</h4>`;
-                subcategoryContainer.style.display = "block";
-                data.subcategories.forEach(subcategory => {
-                    // console.log(subcategory.id.toString());
-                    let checked = selectedsubCategories.includes(subcategory.id.toString()) ? "checked" : "";
-                    checkbox += `
-                        <div class="form-check-f">
-                            <input class="form-check-input" type="checkbox" name="subcategories[]" 
-                                value="${subcategory.id}" id="subcategory-${subcategory.id}" ${checked}>
-                            <label class="form-check-label" for="subcategory-${subcategory.id}">
-                                ${subcategory.name}
-                            </label>
-                        </div>`;
-                    });
-                    subcategoryContainer.innerHTML += checkbox;
-
-                // Add change event listener to subcategories
-                document.querySelectorAll('input[name="subcategories[]"]').forEach(subCheckbox => {
-                    subCheckbox.addEventListener('change', function () {
-                        document.getElementById('filter-form').submit();
-                    });
-                });
-                
-            } else {
-                subcategoryContainer.style.display = "none";
-            }
-        })
-        
-    }
-});
-</script>
-
-
-<script>
-    $(document).ready(function () {
-        let urlParams = new URLSearchParams(window.location.search);
-        let selectedBrands = [];
-        let selectedCategories = [];
-
-        // Extracting brands from the URL correctly
-        urlParams.forEach((value, key) => {
-            if (key.startsWith("brands")) {
-                selectedBrands.push(value);
-            }
-        });
-
-        let categoryContainer = document.getElementById("categories-container");
-
-        // Show categories when brands are selected
-        if (selectedBrands.length > 0) {
-            fetchCategories(selectedBrands);
-        }
-
-        // Listen for brand selection changes
-        $('input[name="brands[]"]').change(function () {
-            selectedBrands = [];
-            $('input[name="brands[]"]:checked').each(function () {
-                selectedBrands.push($(this).val());
-            });
-
-            // Fetch categories when brands are selected/deselected
-            if (selectedBrands.length > 0) {
-                fetchCategories(selectedBrands);
-            } else {
-                categoryContainer.style.display = "none";
-            }
-        });
-
-        // Function to fetch categories based on selected brands
-        function fetchCategories(brands) {
-            fetch("{{ route('fetch.categories') }}", {
-                method: "POST",
-                headers: {
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ brands: brands })
-            })
-            .then(response => response.json())
-            .then(data => {
-                categoryContainer.innerHTML = ""; // Clear old categories
-                if (data.categories.length > 0) {
-                    let checkbox = ``;
-                    categoryContainer.style.display = "block"; // Show category filter
-                    data.categories.forEach(category => {
-                        let checked = selectedCategories.includes(category.id.toString()) ? "checked" : "";
-                        checkbox += `
-                            <div class="form-check-f">
-                                <input class="form-check-input" type="checkbox" name="categories[]" 
-                                    value="${category.id}" id="category-${category.id}" ${checked}>
-                                <label class="form-check-label" for="category-${category.id}">
-                                    ${category.name}
-                                </label>
-                            </div>`;
-                    });
-                    categoryContainer.innerHTML += checkbox;
-
-                    // Add change event listener to categories
-                    document.querySelectorAll('input[name="categories[]"]').forEach(catCheckbox => {
-                        catCheckbox.addEventListener('change', function () {
-                            document.getElementById('filter-form').submit();
+            // Function to fetch subcategories based on selected categories
+            function fetchSubcategories(categories, selectedSubCategories) {
+                fetch("{{ route('fetch.subcategories') }}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ categories: categories })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    subcategoryContainer.innerHTML = "";
+                    if (data.subcategories.length > 0) {
+                        let subcategoryHtml = `<h4>Sub Category</h4>`;
+                        subcategoryContainer.style.display = "block";
+                        
+                        data.subcategories.forEach(subcategory => {
+                            let checked = selectedSubCategories.includes(subcategory.id.toString()) ? "checked" : "";
+                            subcategoryHtml += `
+                                <div class="form-check-f">
+                                    <input class="form-check-input subcategory-checkbox" type="checkbox" name="subcategories[]" 
+                                        value="${subcategory.id}" id="subcategory-${subcategory.id}" ${checked}>
+                                    <label class="form-check-label" for="subcategory-${subcategory.id}">
+                                        ${subcategory.name}
+                                    </label>
+                                </div>`;
                         });
-                    });
-                } else {
-                    categoryContainer.style.display = "none";
-                }
-            })
-            .catch(error => console.log(error));
-        }
-    });
-</script> -->
+                        subcategoryContainer.innerHTML = subcategoryHtml;
+
+                        // Add event listeners to subcategory checkboxes
+                        document.querySelectorAll('.subcategory-checkbox').forEach(subCheckbox => {
+                            subCheckbox.addEventListener('change', function () {
+                                submitForm();
+                            });
+                        });
+                    } else {
+                        subcategoryContainer.style.display = "none";
+                    }
+                })
+                .catch(error => console.log(error));
+            }
+
+            // Form auto-submit function
+            function submitForm() {
+                $("#filter-form").submit();
+            }
+
+            // Category and subcategory change events (for dynamically added elements)
+            $(document).on("change", 'input[name="categories[]"], input[name="subcategories[]"]', function () {
+                submitForm();
+            });
+        });
+        </script>
 
 
     @endpush

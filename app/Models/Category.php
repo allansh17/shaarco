@@ -12,9 +12,17 @@ class Category extends Model
 
     protected $table = 'category';
 
+    protected $fillable = ['name', 'slug', 'image', 'status'];
+
     // Define relationship to subcategories
     public function subcategories()
     {
         return $this->hasMany(SubCategory::class);
+    }
+
+    // Define many-to-many relationship with brands
+    public function brands()
+    {
+        return $this->belongsToMany(Brands::class, 'category_brand', 'category_id', 'brand_id');
     }
 }
