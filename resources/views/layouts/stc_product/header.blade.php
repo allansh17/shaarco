@@ -154,6 +154,108 @@
         .navbar-collapse.show .dropdown-toggle {
             color: white !important;
         }
+
+        /* Mobile user icon visibility */
+        @media (max-width: 991px) {
+            /* Hide original cart and user login on mobile */
+            .cart {
+                display: none !important;
+            }
+        }
+        
+        /* Mobile Navigation Bar */
+        .mobile-nav-bar {
+            display: none;
+            background-color: #3887CD;
+            padding: 10px 0;
+            position: relative;
+            z-index: 50;
+        }
+        
+        @media (max-width: 991px) {
+            .mobile-nav-bar {
+                display: block !important;
+            }
+            
+            /* Ensure mobile menu appears above mobile nav bar */
+            .navbar-collapse {
+                z-index: 9999 !important;
+                margin-top: 15px !important;
+                background: linear-gradient(135deg, #3887CD 0%, #2c6bb3 100%) !important;
+                border-radius: 0 0 12px 12px !important;
+                box-shadow: 0 4px 20px rgba(56, 135, 205, 0.3) !important;
+            }
+            
+            .bottom-nav {
+                position: relative;
+                z-index: 1000;
+            }
+        }
+        
+        .mobile-nav-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+            gap: 30px;
+        }
+        
+        .mobile-nav-left {
+            display: flex;
+            align-items: center;
+        }
+        
+        .mobile-nav-right {
+            display: flex;
+            align-items: center;
+        }
+        
+        .mobile-cart-icon,
+        .mobile-user-icon {
+            position: relative;
+            padding: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-cart-icon:hover,
+        .mobile-user-icon:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .mobile-cart-icon img,
+        .mobile-user-icon img {
+            width: 24px;
+            height: 24px;
+            filter: brightness(0) invert(1);
+        }
+        
+        .mobile-user-dropdown {
+            position: relative;
+        }
+        
+        .mobile-user-name {
+            color: white;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 8px 12px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-user-name:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .mobile-user-name i {
+            margin-left: 8px;
+        }
     </style>
 </head>
 
@@ -286,6 +388,8 @@
                     <div class="container">
                         {{-- The 'جميع العلامات التجارية' dropdown button has been moved into the navbar-collapse for mobile --}}
                         
+
+                        
                         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                             data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
                             aria-label="Toggle navigation">
@@ -337,6 +441,7 @@
                                         </ul>
                                     </div>
                                 </li>
+
                             </ul>
                         </div>
                     </div>
@@ -344,6 +449,53 @@
             </div>
         </div>
     </header>
+
+    <!-- Mobile Navigation Bar -->
+    <div class="mobile-nav-bar">
+        <div class="mobile-nav-content">
+            <div class="mobile-nav-left">
+                <!-- Mobile Cart Icon -->
+                <a href="{{ route('cart-page') }}" class="mobile-cart-icon">
+                    <div style="position: relative;">
+                        <img src="{{ asset('stc_css/images/ShoppingCartSimple.svg') }}" alt="Cart">
+                        @php
+                            $totalItems = App\Helpers\CartHelper::getTotalItems();
+                        @endphp
+                        @if ($totalItems > 0)
+                            <span style="position: absolute; top: -8px; right: -8px; background-color: #ffffff; color: #1b6392; border-radius: 50%; padding: 2px 6px; font-size: 11px; font-weight: bold; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">
+                                {{ $totalItems }}
+                            </span>
+                        @endif
+                    </div>
+                </a>
+            </div>
+            
+            <div class="mobile-nav-right">
+                <!-- Mobile User Section -->
+                @if(Auth::guard('local')->check())
+                    <div class="mobile-user-dropdown">
+                        <div class="mobile-user-name" onclick="toggleMobileUserMenu()">
+                            <i class="fas fa-user"></i>
+                            {{ Auth::guard('local')->user()->first_name }}
+                            <i class="fas fa-chevron-down" style="margin-left: 5px; font-size: 12px;"></i>
+                        </div>
+                        <div id="mobile-user-menu" style="display: none; position: absolute; top: 100%; right: 0; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 8px; min-width: 150px; z-index: 1000; margin-top: 5px;">
+                            <a href="#" style="display: block; padding: 10px 15px; color: #333; text-decoration: none; border-bottom: 1px solid #eee;">
+                                <i class="fas fa-user-circle" style="margin-right: 8px;"></i>My Profile
+                            </a>
+                            <a href="{{ route('log_out') }}" style="display: block; padding: 10px 15px; color: #333; text-decoration: none;">
+                                <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i>Logout
+                            </a>
+                        </div>
+                    </div>
+                @else
+                    <a href="{{ route('sign_in') }}" class="mobile-user-icon">
+                        <img src="{{ asset('stc_css/images/User.svg') }}" alt="User">
+                    </a>
+                @endif
+            </div>
+        </div>
+    </div>
 
     @yield('content')
     @include('layouts.stc_product.footer')
@@ -452,6 +604,28 @@
             });
         });
 
+    </script>
+
+    <script>
+        // Mobile user dropdown toggle
+        function toggleMobileUserMenu() {
+            const menu = document.getElementById('mobile-user-menu');
+            if (menu.style.display === 'none' || menu.style.display === '') {
+                menu.style.display = 'block';
+            } else {
+                menu.style.display = 'none';
+            }
+        }
+
+        // Close mobile user menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const userDropdown = document.querySelector('.mobile-user-dropdown');
+            const menu = document.getElementById('mobile-user-menu');
+            
+            if (userDropdown && !userDropdown.contains(event.target)) {
+                menu.style.display = 'none';
+            }
+        });
     </script>
 
 
