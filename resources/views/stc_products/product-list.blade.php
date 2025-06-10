@@ -387,8 +387,12 @@
                 }
             });
 
+            // If categories are selected in URL but no brands, fetch associated brands first
+            if (selectedCategories.length > 0 && selectedBrands.length === 0) {
+                fetchBrandsFromCategories(selectedCategories);
+            }
             // If brands are selected, fetch categories
-            if (selectedBrands.length > 0) {
+            else if (selectedBrands.length > 0) {
                 fetchCategories(selectedBrands, selectedCategories);
             }
 
@@ -416,6 +420,32 @@
 
                 submitForm();
             });
+
+            // Function to fetch brands based on selected categories
+            function fetchBrandsFromCategories(categories) {
+                fetch("{{ route('fetch.brands') }}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ categories: categories })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.brands && data.brands.length > 0) {
+                        // Check the brand checkboxes that are associated with the selected categories
+                        data.brands.forEach(brand => {
+                            $('input[name="brands[]"][value="' + brand.id + '"]').prop('checked', true);
+                            selectedBrands.push(brand.id.toString());
+                        });
+                        
+                        // Now fetch categories with the selected brands
+                        fetchCategories(selectedBrands, selectedCategories);
+                    }
+                })
+                .catch(error => console.log(error));
+            }
 
             // Function to fetch categories based on selected brands
             function fetchCategories(brands, selectedCategories) {
