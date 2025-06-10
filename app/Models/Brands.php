@@ -12,9 +12,15 @@ class Brands extends Model
 
     protected $table = 'brands';
 
-    // Define relationship to subcategories
+    // Define relationship to products
     public function products()
     {
-        return $this->hasMany(Product::class, 'brands', 'id');  // Matching based on the brand name
+        return $this->hasMany(Product::class, 'brands', 'id');
+    }
+
+    // Define many-to-many relationship with categories
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'category_brand', 'brand_id', 'category_id');
     }
 }
