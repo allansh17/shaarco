@@ -146,48 +146,64 @@
     <div class="container">
         <div class="hedding_part">
             <h2>أفضل العلامات التجارية</h2>
+            <p class="section_subtitle">اختر العلامة التجارية لتصفح الفئات والمنتجات</p>
         </div>
-        <div class="brand_slider">
-            <div class="owl-carousel brand_carousel">
+        
+        <!-- Brand Navigation Container -->
+        <div class="brand_navigation_container">
+            <!-- Brands Grid -->
+            <div class="brands_grid" id="brandsGrid">
                 @foreach($brands as $brand)
-
-                    <div class="item">
-                        <a href="{{route('products', ['brands[]' => $brand->id])}}">
-                            <div class="brand_img">
-
-                                <img src="{{asset('uploads/Brands/' . $brand->image)}}" alt="Brand 1">
-
-                            </div>
-                            </a>
+                <div class="brand_bubble" data-brand-id="{{ $brand->id }}" data-brand-name="{{ $brand->name }}">
+                    <div class="bubble_content">
+                        <div class="brand_logo_container">
+                            @if($brand->image && file_exists(public_path('uploads/Brands/' . $brand->image)))
+                                <img src="{{ asset('uploads/Brands/' . $brand->image) }}" alt="{{ $brand->name }}" class="brand_logo">
+                            @else
+                                <!-- Fallback when no image -->
+                                <div class="brand_logo_fallback">
+                                    <i class="{{ get_brand_icon($brand->name) }}"></i>
+                                </div>
+                            @endif
+                        </div>
+                        <div class="brand_info">
+                            <h4>{{ $brand->name }}</h4>
+                            <span class="brand_count">{{ $brand->categories ? $brand->categories->count() : 0 }} فئة</span>
+                        </div>
+                        <div class="bubble_arrow">
+                            <i class="fas fa-chevron-left"></i>
+                        </div>
                     </div>
-
+                </div>
                 @endforeach
-                <!-- <div class="item">
-    <div class="brand_img">
-        <img src="{{asset('stc_css/images/BISON POWER.png')}}" alt="Brand 2">
-    </div>
-</div>
-<div class="item">
-    <div class="brand_img">
-        <img src="{{asset('stc_css/images/FIREBIRD.png')}}" alt="Brand 3">
-    </div>
-</div>
-<div class="item">
-    <div class="brand_img">
-        <img src="{{asset('stc_cssimages/FLEXBIMEC LOGO.png')}}" alt="Brand 4">
-    </div>
-</div>
-<div class="item">
-    <div class="brand_img">
-        <img {{asset('stc_css/images/IDROBASE.png')}}" alt="Brand 5">
-    </div>
-</div>
-<div class="item">
-    <div class="brand_img">
-        <img src="{{asset('stc_css/images/MAZZONI (1).png')}}" alt="Brand 6">
-    </div>
-</div> -->
-
+            </div>
+            
+            <!-- Categories Grid (Hidden by default) -->
+            <div class="categories_grid" id="categoriesGrid" style="display: none;">
+                <div class="navigation_header">
+                    <button class="back_button" id="backToBrands">
+                        <i class="fas fa-arrow-right"></i>
+                        العودة للعلامات التجارية
+                    </button>
+                    <h3 id="selectedBrandName">الفئات</h3>
+                </div>
+                <div class="categories_container" id="categoriesContainer">
+                    <!-- Categories will be loaded dynamically -->
+                </div>
+            </div>
+            
+            <!-- Subcategories Grid (Hidden by default) -->
+            <div class="subcategories_grid" id="subcategoriesGrid" style="display: none;">
+                <div class="navigation_header">
+                    <button class="back_button" id="backToCategories">
+                        <i class="fas fa-arrow-right"></i>
+                        العودة للفئات
+                    </button>
+                    <h3 id="selectedCategoryName">الفئات الفرعية</h3>
+                </div>
+                <div class="subcategories_container" id="subcategoriesContainer">
+                    <!-- Subcategories will be loaded dynamically -->
+                </div>
             </div>
         </div>
     </div>
@@ -554,6 +570,122 @@
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+
+<!-- Brand Navigation Script -->
+<script>
+$(document).ready(function() {
+    // Brand navigation data
+    const brandsData = @json($brands);
+    
+    // Show categories when brand bubble is clicked
+    $('.brand_bubble').click(function() {
+        const brandId = $(this).data('brand-id');
+        const brandName = $(this).data('brand-name');
+        const brand = brandsData.find(b => b.id == brandId);
+        
+        if (brand && brand.categories && brand.categories.length > 0) {
+            showCategories(brand, brandName);
+        } else {
+            // If no categories, go directly to products page
+            window.location.href = "{{route('products')}}?brands[]=" + brandId;
+        }
+    });
+    
+    // Back to brands button
+    $('#backToBrands').click(function() {
+        $('#categoriesGrid').hide();
+        $('#subcategoriesGrid').hide();
+        $('#brandsGrid').show();
+    });
+    
+    // Back to categories button
+    $('#backToCategories').click(function() {
+        $('#subcategoriesGrid').hide();
+        $('#categoriesGrid').show();
+    });
+    
+    function showCategories(brand, brandName) {
+        $('#selectedBrandName').text('فئات ' + brandName);
+        $('#categoriesContainer').empty();
+        
+        brand.categories.forEach(function(category) {
+            const categoryHtml = `
+                <div class="category_bubble" data-category-id="${category.id}" data-brand-id="${brand.id}" data-category-name="${category.name}">
+                    <div class="bubble_content">
+                        <div class="category_icon">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
+                        <div class="category_info">
+                            <h4>${category.name}</h4>
+                            <span class="category_count">${category.subcategories ? category.subcategories.length : 0} فئة فرعية</span>
+                        </div>
+                        <div class="bubble_arrow">
+                            <i class="fas fa-chevron-left"></i>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('#categoriesContainer').append(categoryHtml);
+        });
+        
+        // Add event listeners to category bubbles
+        $('.category_bubble').click(function() {
+            const categoryId = $(this).data('category-id');
+            const brandId = $(this).data('brand-id');
+            const categoryName = $(this).data('category-name');
+            const category = brand.categories.find(c => c.id == categoryId);
+            
+            if (category && category.subcategories && category.subcategories.length > 0) {
+                showSubcategories(category, categoryName, brandId);
+            } else {
+                // If no subcategories, go to products page
+                window.location.href = "{{route('products')}}?brands[]=" + brandId + "&categories[]=" + categoryId;
+            }
+        });
+        
+        $('#brandsGrid').hide();
+        $('#categoriesGrid').show();
+    }
+    
+    function showSubcategories(category, categoryName, brandId) {
+        $('#selectedCategoryName').text('فئات فرعية لـ ' + categoryName);
+        $('#subcategoriesContainer').empty();
+        
+        category.subcategories.forEach(function(subcategory) {
+            const subcategoryHtml = `
+                <div class="subcategory_bubble" data-subcategory-id="${subcategory.id}" data-category-id="${category.id}" data-brand-id="${brandId}">
+                    <div class="bubble_content">
+                        <div class="subcategory_icon">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                        <div class="subcategory_info">
+                            <h4>${subcategory.name}</h4>
+                            <span class="subcategory_link">عرض المنتجات</span>
+                        </div>
+                        <div class="bubble_arrow">
+                            <i class="fas fa-chevron-left"></i>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('#subcategoriesContainer').append(subcategoryHtml);
+        });
+        
+        // Add event listeners to subcategory bubbles
+        $('.subcategory_bubble').click(function() {
+            const subcategoryId = $(this).data('subcategory-id');
+            const categoryId = $(this).data('category-id');
+            const brandId = $(this).data('brand-id');
+            
+            // Go to products page with all filters
+            window.location.href = "{{route('products')}}?brands[]=" + brandId + "&categories[]=" + categoryId + "&subcategories[]=" + subcategoryId;
+        });
+        
+        $('#categoriesGrid').hide();
+        $('#subcategoriesGrid').show();
+    }
+});
+</script>
 
 <!-- End About Section -->
 

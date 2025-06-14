@@ -43,7 +43,23 @@ class HomeController extends Controller
         $sliders = Slider::where('customer_type', $customerType)->orWhere('customer_type', 'all')->get();
         $ads = ad::where('customer_type', $customerType)->orWhere('customer_type', 'all')->where('published_status',1)->get();
 
-        $brands = Brands::all();
+        // Fetch all brands with their related categories and subcategories 
+        // First try to get only active brands (status = 2)
+        $brands = Brands::with(['categories.subcategories'])
+                        ->where('status', '2')
+                        ->get();
+        
+        // If no active brands found, get all brands as fallback
+        if($brands->count() == 0) {
+            $brands = Brands::with(['categories.subcategories'])->get();
+        }
+        
+        // Debug output
+        \Log::info('Brands found: ' . $brands->count());
+        foreach($brands as $brand) {
+            \Log::info("Brand: {$brand->name}, Status: {$brand->status}, Image: {$brand->image}");
+        }
+        
         // $products = Product::where('new_products', 'yes')
         // ->where('products.status','1')
         // ->orWhere('best_seller', 'yes')
@@ -74,8 +90,22 @@ class HomeController extends Controller
             ->orderBy('products.created_at', 'desc')
             ->limit(2)
             ->get();
-        $categorys = Category::all();
+        $categorys = Category::with('subcategories')->get();
         return view('stc_products.index', compact('ads','sliders', 'brands', 'products', 'categorys', 'mostproducts'));
+    }
+
+    public function getBrandCategories($brandId)
+    {
+        $brand = Brands::with(['categories.subcategories'])->find($brandId);
+        
+        if (!$brand) {
+            return response()->json(['error' => 'Brand not found'], 404);
+        }
+        
+        return response()->json([
+            'brand' => $brand,
+            'categories' => $brand->categories
+        ]);
     }
 
     public function productdetails($id)

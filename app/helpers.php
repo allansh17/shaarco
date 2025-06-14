@@ -488,3 +488,57 @@ function company_setting(){
     
         return $company_settings; 
 }
+
+// Get appropriate icon for brand based on name
+function get_brand_icon($brandName) {
+    $brandName = strtolower(trim($brandName));
+    
+    // Icon mapping based on common brand types
+    $iconMap = [
+        'water' => 'fas fa-tint',
+        'pump' => 'fas fa-cog',
+        'pressure' => 'fas fa-gauge-high',
+        'washer' => 'fas fa-spray-can',
+        'cleaning' => 'fas fa-broom',
+        'car' => 'fas fa-car',
+        'auto' => 'fas fa-wrench',
+        'power' => 'fas fa-bolt',
+        'electric' => 'fas fa-plug',
+        'motor' => 'fas fa-gear',
+        'tools' => 'fas fa-tools',
+        'industrial' => 'fas fa-industry',
+        'tech' => 'fas fa-microchip',
+        'machine' => 'fas fa-cogs',
+        'equipment' => 'fas fa-hammer',
+        'spare' => 'fas fa-puzzle-piece',
+        'parts' => 'fas fa-cubes',
+        'valve' => 'fas fa-circle-dot',
+        'pipe' => 'fas fa-grip-lines-vertical',
+        'hose' => 'fas fa-wave-square',
+        'filter' => 'fas fa-filter',
+        'oil' => 'fas fa-oil-can',
+        'engine' => 'fas fa-engine',
+        'hydraulic' => 'fas fa-compress-arrows-alt'
+    ];
+    
+    // Check for keywords in brand name
+    foreach ($iconMap as $keyword => $icon) {
+        if (strpos($brandName, $keyword) !== false) {
+            return $icon;
+        }
+    }
+    
+    // Default icons based on first letter
+    $firstLetter = substr($brandName, 0, 1);
+    if (in_array($firstLetter, ['a', 'b', 'c', 'd', 'e'])) {
+        return 'fas fa-star';
+    } elseif (in_array($firstLetter, ['f', 'g', 'h', 'i', 'j'])) {
+        return 'fas fa-crown';
+    } elseif (in_array($firstLetter, ['k', 'l', 'm', 'n', 'o'])) {
+        return 'fas fa-gem';
+    } elseif (in_array($firstLetter, ['p', 'q', 'r', 's', 't'])) {
+        return 'fas fa-shield-alt';
+    } else {
+        return 'fas fa-medal';
+    }
+}

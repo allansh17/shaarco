@@ -67,6 +67,9 @@ Route::post('/update-status', [InquiryController::class, 'updateStatus'])->name(
 // web.php
 Route::get('/getProductsByCategory', [ProductController::class, 'getProductsByCategory'])->name('getProductsByCategory');
 
+// Route for getting brand categories and subcategories
+Route::get('/getBrandCategories/{brandId}', [HomeController::class, 'getBrandCategories'])->name('getBrandCategories');
+
 
 Route::get('/', [HomeController::class, 'index'])->name('index');
 Route::get('/productdetails/{id}', [HomeController::class, 'productdetails'])->name('productdetails');
