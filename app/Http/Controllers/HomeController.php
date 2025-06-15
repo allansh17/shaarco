@@ -268,8 +268,8 @@ class HomeController extends Controller
     // 🟢 **Sort by newest first**
     $productsQuery->orderBy('created_at', 'desc');
 
-    // 🟢 **Paginate Products (12 Per Page)**
-    $allProducts = $productsQuery->paginate(12);
+    // 🟢 **Paginate Products (24 Per Page)**
+    $allProducts = $productsQuery->paginate(24);
 
     // 🟢 **Fetch Brands, Categories & Subcategories for Filters**
     $brands = Brands::all();
