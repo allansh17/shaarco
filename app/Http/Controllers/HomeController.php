@@ -265,6 +265,9 @@ class HomeController extends Controller
         $productsQuery->whereIn('brands', $selectedBrands);
     }
 
+    // 🟢 **Sort by newest first**
+    $productsQuery->orderBy('created_at', 'desc');
+
     // 🟢 **Paginate Products (12 Per Page)**
     $allProducts = $productsQuery->paginate(12);
 
@@ -451,6 +454,9 @@ public function getproducts($id, Request $request)
             }
         });
     }
+
+    // 🟢 **Sort by newest first**
+    $productsQuery->orderBy('created_at', 'desc');
 
     // 🟢 **Paginate the Products**
     $allProducts = $productsQuery->paginate(9);
