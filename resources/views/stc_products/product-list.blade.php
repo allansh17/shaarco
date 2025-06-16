@@ -156,6 +156,32 @@
                                             @elseif(Auth::guard('local')->check() && Auth::guard('local')->user()->user_type == "normal")
                                                 <div class="product_price">{{ $product->normal_price }}</div>
                                             @endif
+
+                                            @if($product->stock_status == 0)
+                                                <div class="text-danger mt-2">Out of Stock</div>
+                                            @else
+                                                <form class="add-to-cart-form mt-2" data-product-id="{{ $product->id }}">
+                                                    @csrf
+                                                    <div class="input-add d-flex">
+                                                        <span class="input-group-btn">
+                                                            <button type="button" class="btn btn-default btn-number" data-type="minus" data-field="qty" disabled="disabled">
+                                                                <span class="glyphicon glyphicon-minus">-</span>
+                                                            </button>
+                                                        </span>
+                                                        <input type="text" name="qty" class="form-control input-number" value="1" min="1" max="10">
+                                                        <span class="input-group-btn">
+                                                            <button type="button" class="btn btn-default btn-number" data-type="plus" data-field="qty">
+                                                                <span class="glyphicon glyphicon-plus">+</span>
+                                                            </button>
+                                                        </span>
+                                                    </div>
+                                                    @if(!Auth::guard('local')->check())
+                                                        <a href="{{route('sign_in')}}" class="btn btn-primary mt-2 w-100">Add to Cart</a>
+                                                    @else
+                                                        <button type="submit" class="btn btn-primary mt-2 w-100">Add to Cart</button>
+                                                    @endif
+                                                </form>
+                                            @endif
                                         </div>
                                     </a>
                                 </div>
@@ -558,6 +584,70 @@
             // Category and subcategory change events (for dynamically added elements)
             $(document).on("change", 'input[name="categories[]"], input[name="subcategories[]"]', function () {
                 submitForm();
+            });
+        });
+        </script>
+
+        <script>
+        $(document).ready(function() {
+            // Handle quantity buttons
+            $(".btn-number").click(function(e) {
+                e.preventDefault();
+                
+                let button = $(this);
+                let type = button.attr("data-type");
+                let input = button.closest(".input-add").find("input");
+                let currentValue = parseInt(input.val());
+                let min = parseInt(input.attr('min')) || 1;
+                let max = parseInt(input.attr('max')) || 10;
+
+                if (type === "plus" && currentValue < max) {
+                    input.val(currentValue + 1);
+                } else if (type === "minus" && currentValue > min) {
+                    input.val(currentValue - 1);
+                }
+
+                // Update button states
+                input.closest(".input-add").find(".btn-number[data-type='minus']").prop("disabled", input.val() <= min);
+                input.closest(".input-add").find(".btn-number[data-type='plus']").prop("disabled", input.val() >= max);
+            });
+
+            // Handle form submission
+            $(".add-to-cart-form").submit(function(e) {
+                e.preventDefault();
+                
+                let form = $(this);
+                let productId = form.data('product-id');
+                let quantity = form.find('input[name="qty"]').val();
+                
+                $.ajax({
+                    url: '/add_tocart/' + productId,
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        qty: quantity
+                    },
+                    success: function(response) {
+                        // Show success message
+                        alert('Product added to cart successfully!');
+                        // Optionally update cart count in header if you have one
+                    },
+                    error: function(xhr) {
+                        alert('Error adding product to cart. Please try again.');
+                    }
+                });
+            });
+
+            // Prevent non-numeric input
+            $(".input-number").keydown(function(e) {
+                if ($.inArray(e.keyCode, [46, 8, 9, 27, 13]) !== -1 ||
+                    (e.keyCode == 65 && e.ctrlKey === true) ||
+                    (e.keyCode >= 35 && e.keyCode <= 39)) {
+                    return;
+                }
+                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                    e.preventDefault();
+                }
             });
         });
         </script>
