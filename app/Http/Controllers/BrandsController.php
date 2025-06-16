@@ -149,7 +149,7 @@ class BrandsController extends Controller
     {
 
         $rules = [
-            'name' => 'required|string|alpha',
+            'name' => 'required|string',
             'image' => 'nullable|image|mimes:jpg,jpeg,png',
 
         ];

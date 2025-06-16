@@ -325,7 +325,8 @@
             if (!value) {
                 return true; // allow empty values
             }
-            return /^[a-zA-Z ]+$/.test(value); // only allow alphabetical characters and spaces
+            // Allow any character except leading/trailing spaces
+            return /^\S[\s\S]*\S$|^\S$/.test(value);
         }, 'Only alphabates are allowed');
 
 
