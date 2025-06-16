@@ -645,6 +645,15 @@ $(document).ready(function() {
         
         $('#brandsGrid').hide();
         $('#categoriesGrid').show();
+        // Scroll to categoriesGrid on mobile only
+        if (window.innerWidth <= 767) {
+            setTimeout(function() {
+                const catGrid = document.getElementById('categoriesGrid');
+                if (catGrid) {
+                    catGrid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 200); // slight delay to ensure visibility
+        }
     }
     
     function showSubcategories(category, categoryName, brandId) {
