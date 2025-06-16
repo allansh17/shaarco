@@ -129,7 +129,7 @@
                         </div>
                         <div class="search-custom_btn">
                             <input type="text" id="searchBox1" class="form-control" placeholder="ابحث عن أي شيء..." value="{{ request('query1') }}" autocomplete="off">
-                            <button class="btn" type="button" id="searchButton1">يبحث </button>
+                            <button class="btn" type="button" id="searchButton1">ابحث </button>
                         </div>
                     </div>
                     <div class="row" id="productTable">
