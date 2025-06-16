@@ -649,6 +649,22 @@
                     e.preventDefault();
                 }
             });
+
+            // Trigger search on Enter key in search box
+            $('#searchBox1').on('keypress', function(e) {
+                if (e.which === 13) { // 13 is Enter key
+                    $('#searchButton1').click();
+                    e.preventDefault();
+                }
+            });
+
+            // Handle search button click
+            $('#searchButton1').click(function() {
+                // Set the value of the hidden input to the search box value
+                $('#hiddenSearchQuery').val($('#searchBox1').val());
+                // Submit the filter form
+                $('#filter-form').submit();
+            });
         });
         </script>
 
