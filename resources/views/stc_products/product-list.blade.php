@@ -629,7 +629,7 @@
                     },
                     success: function(response) {
                         // Show success message
-                        alert('Product added to cart successfully!');
+                        alert('تمت اضافة الاصناف للسلة بنجاح، الرجاء استكمال ارسال الطلب في سلتك');
                         // Optionally update cart count in header if you have one
                     },
                     error: function(xhr) {
