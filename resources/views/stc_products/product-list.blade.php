@@ -40,7 +40,7 @@
                      <!-- Hidden Input for Search Query -->
                     <input type="hidden" name="query1" id="hiddenSearchQuery" value="{{ request('query1') }}">
                     <div class="filter_card">
-                        <h3>ترشيح</h3>
+                        <h3>فرز المنتجات</h3>
 
                         <!-- Brand Filters -->
                         <div class="select_filter">
