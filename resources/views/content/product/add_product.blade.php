@@ -589,8 +589,7 @@
                         <div class="card-body">
                             <!-- Meta Title -->
                             <div class="mb-3 col">
-                                <label class="form-label mb-1" for="ecommerce-meta-title">Meta Title<span
-                                        class="text-danger">*</span></label>
+                                <label class="form-label mb-1" for="ecommerce-meta-title">Meta Title</label>
                                 <input type="text" class="form-control" id="ecommerce-meta-title"
                                     placeholder="Meta Title" name="meta_title" aria-label="Meta Title"
                                     value="{{ isset($product_detail) ? $product_detail->meta_title : ''}}">
@@ -601,8 +600,7 @@
                             <!-- /Meta Title -->
                             <!-- Meta Keyword -->
                             <div class="mb-3 col">
-                                <label class="form-label mb-1" for="ecommerce-meta-keyword">Meta Keyword<span
-                                        class="text-danger">*</span></label>
+                                <label class="form-label mb-1" for="ecommerce-meta-keyword">Meta Keyword</label>
                                 <input type="text" class="form-control" id="ecommerce-meta-keyword"
                                     placeholder="Meta Keyword" name="meta_keyword" aria-label="Meta Keyword"
                                     value="{{ isset($product_detail) ? $product_detail->meta_keyword : ''}}">
@@ -613,8 +611,7 @@
                             <!-- /Meta Keyword -->
                             <!-- Meta Description -->
                             <div class="mb-3 col">
-                                <label class="form-label mb-1" for="ecommerce-meta-description">Meta Description<span
-                                        class="text-danger">*</span></label>
+                                <label class="form-label mb-1" for="ecommerce-meta-description">Meta Description</label>
                                 <textarea type="text" class="form-control" id="ecommerce-meta-description"
                                     placeholder="Meta Description" name="meta_description"
                                     aria-label="Meta Description">{{ isset($product_detail) ? $product_detail->meta_description : ''}}</textarea>
@@ -2073,18 +2070,14 @@
                     required: true
                 },
                 meta_title: {
-                    required: true
+                    // Optional field - no validation required
                 },
                 meta_keyword: {
-                    required: true
+                    // Optional field - no validation required
                 },
                 meta_description: {
-                    required: true,
                     maxlength: '500',
                 },
-                // attachments: {
-                //     extension: "pdf", 
-                // },
                 d_mode: {
                     required: true,
                 },
