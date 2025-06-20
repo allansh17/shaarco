@@ -62,6 +62,64 @@
     max-height: 100% !important;
 }
 
+/* Styles for clickable images */
+.clickable-image {
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+.clickable-image:hover {
+    opacity: 0.8;
+}
+
+/* Add a subtle overlay to indicate clickability */
+.image-container {
+    position: relative;
+    display: inline-block;
+}
+
+.image-container::after {
+    content: "🔍";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px;
+    border-radius: 50%;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.image-container:hover::after {
+    opacity: 1;
+}
+
+/* Ensure clickable images work properly within lightSlider */
+.lSSlideWrapper.usingCss .image-container {
+    width: 100%;
+    height: 100%;
+}
+
+.lSSlideWrapper.usingCss .image-container a {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.lSSlideWrapper.usingCss .image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Ensure the magnifying glass icon appears correctly */
+.lSSlideWrapper.usingCss .image-container::after {
+    z-index: 10;
+}
+
 </style>
 <!-- CSS for Selected Color -->
 <style>
@@ -172,9 +230,13 @@
                             <!-- Main Display Image (First Item) -->
                           <li data-thumb="{{ asset('uploads/product/product_image/' . $productdetails->product_image) }}"
     class="{{ $productdetails->stock_status == 0 ? 'out-of-stock' : '' }}">
-    <img id="mainDisplay" 
-         src="{{ asset('uploads/product/product_image/' . $productdetails->product_image) }}" 
-         alt="Main Product Image" />
+    <div class="image-container">
+        <a href="{{ asset('uploads/product/product_image/' . $productdetails->product_image) }}" target="_blank" class="clickable-image" title="انقر لفتح الصورة في نافذة جديدة">
+            <img id="mainDisplay" 
+                 src="{{ asset('uploads/product/product_image/' . $productdetails->product_image) }}" 
+                 alt="Main Product Image" />
+        </a>
+    </div>
 </li>
 
                             <!-- Loop through the other images/videos -->
@@ -195,9 +257,13 @@
                                         </video>
                                     @else
                                         <!-- Image -->
-                                        <img class="thumbnail" 
-                                             src="{{ asset('uploads/product/listing_images/' . $video->list_image) }}" 
-                                             alt="Product Image" />
+                                        <div class="image-container">
+                                            <a href="{{ asset('uploads/product/listing_images/' . $video->list_image) }}" target="_blank" class="clickable-image" title="انقر لفتح الصورة في نافذة جديدة">
+                                                <img class="thumbnail" 
+                                                     src="{{ asset('uploads/product/listing_images/' . $video->list_image) }}" 
+                                                     alt="Product Image" />
+                                            </a>
+                                        </div>
                                     @endif
                                 </li>
                             @endforeach
@@ -775,7 +841,10 @@
                     'max-height': '100%'
                 });
         
-                $(".thumbnail").click(function () {
+                $(".thumbnail").click(function (e) {
+                    // Prevent the default anchor behavior for lightSlider functionality
+                    e.preventDefault();
+                    
                     var src = $(this).attr("src");  // Get the src of the clicked image
                     console.log("Clicked image source:", src); // Debug log
         
@@ -783,13 +852,16 @@
         
                     // Update the main display based on whether it's an image or video
                     if (type === "IMG") {
-                        $("#mainDisplay").replaceWith('<img id="mainDisplay" src="' + src + '" alt="Product Image" style="height: 100%; object-fit: contain; width: 100%; max-width: 100%; max-height: 100%;" />');
+                        // Update the main display image and its wrapper
+                        var newImage = '<img id="mainDisplay" src="' + src + '" alt="Product Image" style="height: 100%; object-fit: contain; width: 100%; max-width: 100%; max-height: 100%;" />';
+                        var newWrapper = '<div class="image-container"><a href="' + src + '" target="_blank" class="clickable-image" title="انقر لفتح الصورة في نافذة جديدة">' + newImage + '</a></div>';
+                        $(".lSSlideWrapper.usingCss li.lslide.active").html(newWrapper);
                     } else if (type === "VIDEO") {
                         var videoElement = '<video id="mainDisplay" width="640" height="360" controls autoplay style="height: 100%; object-fit: contain; width: 100%; max-width: 100%; max-height: 100%;">' +
                                             '<source src="' + src + '" type="video/mp4">' +
                                             'Your browser does not support the video tag.' +
                                             '</video>';
-                        $("#mainDisplay").replaceWith(videoElement);
+                        $(".lSSlideWrapper.usingCss li.lslide.active").html(videoElement);
                     }
                 });
             }, 100); // Small delay to ensure everything is loaded
