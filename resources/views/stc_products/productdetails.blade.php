@@ -120,6 +120,39 @@
     z-index: 10;
 }
 
+/* Custom Warranty Icon Styles */
+.warranty-icon-container {
+    display: inline-flex; /* Use inline-flex to prevent full width */
+    align-items: center;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 50px;
+    padding: 5px 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    gap: 12px; /* Use gap for spacing between items */
+}
+
+.warranty-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #3887CD; /* Using theme blue color */
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.warranty-text {
+    font-size: 1rem;
+    color: #495057;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
 </style>
 <!-- CSS for Selected Color -->
 <style>
@@ -312,7 +345,16 @@
                     @endif
 
                     <div class="warrent_images d-flex mt-3">
-                        <img src="{{asset('stc_css/images/months_warranty.png')}}">
+                        @if(isset($productdetails->warranty) && $productdetails->warranty > 0)
+                            <div class="warranty-icon-container">
+                                <div class="warranty-circle">
+                                    {{ $productdetails->warranty }}
+                                </div>
+                                <div class="warranty-text">
+                                    أشهر ضمان
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
