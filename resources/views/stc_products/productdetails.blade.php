@@ -228,8 +228,7 @@
 
                         <ul id="lightSlider">
                             <!-- Main Display Image (First Item) -->
-                          <li data-thumb="{{ asset('uploads/product/product_image/' . $productdetails->product_image) }}"
-    class="{{ $productdetails->stock_status == 0 ? 'out-of-stock' : '' }}">
+                          <li data-thumb="{{ asset('uploads/product/product_image/' . $productdetails->product_image) }}">
     <div class="image-container">
         <a href="{{ asset('uploads/product/product_image/' . $productdetails->product_image) }}" target="_blank" class="clickable-image" title="انقر لفتح الصورة في نافذة جديدة">
             <img id="mainDisplay" 
@@ -376,7 +375,43 @@
                     @endif
 
 
+                    @if ($productdetails->stock_status > 0)
+                        <form class="add-to-cart-form mt-2" data-product-id="{{ $productdetails->id }}">
+                            @csrf
+                            <div class="pr_btn">
+                                <div class="input-add d-flex">
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-default btn-number" data-type="minus"
+                                            data-field="qty" disabled="disabled">
+                                            <span class="glyphicon glyphicon-minus">-</span>
+                                        </button>
+                                    </span>
+                                    <input type="text" name="qty" class="form-control input-number" value="1"
+                                        min="1" max="10">
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-default btn-number" data-type="plus"
+                                            data-field="qty">
+                                            <span class="glyphicon glyphicon-plus">+</span>
+                                        </button>
+                                    </span>
+                                </div>
 
+                                @if (!Auth::guard('local')->check())
+                                    <a href="{{ route('sign_in') }}" class="btn btn-primary mt-2 w-100">Add to Cart</a>
+                                @else
+                                    <button type="submit" class="btn btn-primary">
+                                        <font style="vertical-align: inherit;">
+                                            <font style="vertical-align: inherit;">أضف إلى السلة</font>
+                                        </font>
+                                    </button>
+                                @endif
+                            </div>
+                        </form>
+                    @else
+                        <div class="mt-4" style="color: red; font-weight: bold; font-size: 1.5rem;">
+                            نفد من المخزون
+                        </div>
+                    @endif
                     
                     
                     <div class="select_p">

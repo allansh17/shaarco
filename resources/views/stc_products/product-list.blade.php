@@ -2,14 +2,74 @@
 @section('content')
 
 <style>
+    .out-of-stock {
+        position: relative;
+    }
+
     .out-of-stock img {
-    background-color: red;
-    opacity: 0.5; /* Image transparency */
-    filter: grayscale(100%); /* Convert to grayscale for better effect */
-    pointer-events: none; /* Disable interactions */
-    content: "Out of Stock";
-    color: red;
-}
+        opacity: 0.6; /* Make image slightly transparent */
+        filter: grayscale(50%); /* Add some grayscale effect */
+        transition: all 0.3s ease;
+    }
+
+    /* Out of stock overlay text */
+    .out-of-stock::after {
+        content: "نفد من المخزون";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(220, 53, 69, 0.9); /* Red background with transparency */
+        color: white;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 14px;
+        text-align: center;
+        z-index: 10;
+        white-space: nowrap;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Alternative styling for English text if needed */
+    .out-of-stock.english::after {
+        content: "Out of Stock";
+    }
+
+    /* Hover effect for out of stock products */
+    .out-of-stock:hover img {
+        opacity: 0.5;
+        filter: grayscale(70%);
+    }
+
+    /* Ensure the product image container maintains proper positioning */
+    .product_img {
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Styling for out of stock product cards */
+    .out-of-stock-card {
+        opacity: 0.8;
+        transition: all 0.3s ease;
+    }
+
+    .out-of-stock-card:hover {
+        opacity: 0.9;
+    }
+
+    /* Make the entire card slightly less prominent when out of stock */
+    .out-of-stock-card .product_con h3,
+    .out-of-stock-card .product_con h5,
+    .out-of-stock-card .product_price {
+        opacity: 0.7;
+    }
+
+    /* Ensure the out of stock text in the product content is prominent */
+    .out-of-stock-card .text-danger {
+        opacity: 1 !important;
+        font-weight: bold;
+    }
 
 </style>
 
@@ -140,7 +200,7 @@
                         @else
                         @foreach($allProducts as $key => $product)
                             <div class="col-lg-4 col-md-6 col-sm-6 col-6 product-card" data-seller="{{ $product->best_seller }}">
-                                <div class="product_card">
+                                <div class="product_card {{ $product->stock_status == 0 ? 'out-of-stock-card' : '' }}">
                                     <a href="{{ route('productdetails', $product->id) }}">
                                      <div class="product_img {{ $product->stock_status == 0 ? 'out-of-stock' : '' }}">
                             <img src="{{ asset('uploads/product/product_image/' . $product->product_image) }}" alt="">
@@ -158,7 +218,7 @@
                                             @endif
 
                                             @if($product->stock_status == 0)
-                                                <div class="text-danger mt-2">Out of Stock</div>
+                                                <div class="text-danger mt-2">نفد من المخزون</div>
                                             @else
                                                 <form class="add-to-cart-form mt-2" data-product-id="{{ $product->id }}">
                                                     @csrf
