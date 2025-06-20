@@ -170,62 +170,6 @@
             <div class="col-md-5">
                 <div class="card_images">
                     <div class="demo">
-                        {{-- <ul id="lightSlider">
-
-                            <li
-                                data-thumb="{{asset('uploads/product/product_image/' . $productdetails->product_image)}}">
-                                <img
-                                    src="{{asset('uploads/product/product_image/' . $productdetails->product_image)}}" />
-
-                            </li>
-
-                            @foreach ($productImages as $video)
-                                <li data-thumb="{{ asset('uploads/product/listing_images/' . $video->list_image) }}">
-                                    @if(strpos($video->list_image, '.mp4') !== false)
-                                        <!-- If the file is a video (based on the file extension) -->
-                                        <video width="640" height="360" controls>
-                                            <source src="{{ asset('uploads/product/listing_images/' . $video->list_image) }}"
-                                                type="video/mp4">
-                                            Your browser does not support the video tag.
-                                        </video>
-                                    @else
-                                        <!-- If the file is an image -->
-                                        <img src="{{ asset('uploads/product/listing_images/' . $video->list_image) }}"
-                                            alt="Product Image" />
-                                    @endif
-                                </li>
-
-
-                            @endforeach
-                        </ul> --}}
-
-                        {{-- <ul id="lightSlider">
-                            <!-- Main Display Image (First Item) -->
-                            <li data-thumb="{{ asset('uploads/product/product_image/' . $productdetails->product_image) }}">
-                                <img id="mainDisplay" 
-                                     src="{{ asset('uploads/product/product_image/' . $productdetails->product_image) }}" 
-                                     alt="Main Product Image" />
-                            </li>
-                        
-                            <!-- Loop through the other images/videos -->
-                            @foreach ($productImages as $video)
-                                <li data-thumb="{{ asset('uploads/product/listing_images/' . $video->list_image) }}">
-                                    @if(strpos($video->list_image, '.mp4') !== false)
-                                        <!-- Video -->
-                                        <video class="thumbnail" width="640" height="360" controls>
-                                            <source src="{{ asset('uploads/product/listing_images/' . $video->list_image) }}" type="video/mp4">
-                                            Your browser does not support the video tag.
-                                        </video>
-                                    @else
-                                        <!-- Image -->
-                                        <img class="thumbnail" 
-                                             src="{{ asset('uploads/product/listing_images/' . $video->list_image) }}" 
-                                             alt="Product Image" />
-                                    @endif
-                                </li>
-                            @endforeach
-                        </ul>                         --}}
-
                         <ul id="lightSlider">
                             <!-- Main Display Image (First Item) -->
                           <li data-thumb="{{ asset('uploads/product/product_image/' . $productdetails->product_image) }}">
@@ -269,83 +213,12 @@
                         </ul>
                         
                         
-                        {{-- <ul id="lightSlider">
-                            <!-- Main Display Image (First Item) -->
-                            <li class="main-display" data-thumb="{{ asset('uploads/product/product_image/' . $productdetails->product_image) }}">
-                                <img id="mainDisplay" 
-                                     src="{{ asset('uploads/product/product_image/' . $productdetails->product_image) }}" 
-                                     alt="Main Product Image" />
-                            </li>
-                        
-                            @if(!empty($productImages) && count($productImages) > 0)
-                                @foreach ($productImages as $video)
-                                    <li class="thumbnail-container">
-                                        @if(strpos($video->list_image, '.mp4') !== false)
-                                            <img class="thumbnail" src="{{ asset('uploads/product/listing_images/1731672709_67373a8525676.png') }}" 
-                                                data-video="{{ asset('uploads/product/listing_images/' . $video->list_image) }}" />
-                                        @else
-                                            <img class="thumbnail" src="{{ asset('uploads/product/listing_images/' . $video->list_image) }}" 
-                                                data-image="{{ asset('uploads/product/listing_images/' . $video->list_image) }}" />
-                                        @endif
-                                    </li>
-                                @endforeach
-                            @endif
-                        </ul> --}}
-                        
-                        
-                        
-                        
-                        
-
-                        
                     </div>
                 </div>
             </div>
 
             <div class="col-md-7">
                 <div class="product_de_text">
-                    <!-- <div class="rating d-flex">
-                        <p>(21,671)</p>
-                        <h5>4.7</h5>
-                        <div class="star_rating d-flex">
-                            <a href=""><svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M10.3439 14.8984L14.2814 17.3984C14.7892 17.7187 15.4142 17.2422 15.2657 16.6562L14.1251 12.1719C14.0943 12.0476 14.0992 11.9171 14.1393 11.7954C14.1793 11.6738 14.253 11.566 14.3517 11.4844L17.8829 8.53905C18.3439 8.15624 18.1095 7.3828 17.5079 7.34374L12.8986 7.04686C12.7728 7.03955 12.6519 6.99575 12.5506 6.92083C12.4493 6.84591 12.372 6.74311 12.3282 6.62499L10.6095 2.29686C10.564 2.17179 10.4811 2.06374 10.3721 1.98739C10.2631 1.91104 10.1332 1.87009 10.0001 1.87009C9.86702 1.87009 9.73715 1.91104 9.62814 1.98739C9.51912 2.06374 9.43624 2.17179 9.39074 2.29686L7.67199 6.62499C7.62819 6.74311 7.55092 6.84591 7.44964 6.92083C7.34836 6.99575 7.22745 7.03955 7.10168 7.04686L2.49231 7.34374C1.89074 7.3828 1.65637 8.15624 2.11731 8.53905L5.64856 11.4844C5.74726 11.566 5.82089 11.6738 5.86097 11.7954C5.90106 11.9171 5.90596 12.0476 5.87512 12.1719L4.82043 16.3281C4.64074 17.0312 5.39074 17.6016 5.99231 17.2187L9.65637 14.8984C9.75912 14.8331 9.87836 14.7984 10.0001 14.7984C10.1219 14.7984 10.2411 14.8331 10.3439 14.8984Z"
-                                        fill="#3887CD" />
-                                </svg>
-                            </a>
-                            <a href=""><svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M10.3439 14.8984L14.2814 17.3984C14.7892 17.7187 15.4142 17.2422 15.2657 16.6562L14.1251 12.1719C14.0943 12.0476 14.0992 11.9171 14.1393 11.7954C14.1793 11.6738 14.253 11.566 14.3517 11.4844L17.8829 8.53905C18.3439 8.15624 18.1095 7.3828 17.5079 7.34374L12.8986 7.04686C12.7728 7.03955 12.6519 6.99575 12.5506 6.92083C12.4493 6.84591 12.372 6.74311 12.3282 6.62499L10.6095 2.29686C10.564 2.17179 10.4811 2.06374 10.3721 1.98739C10.2631 1.91104 10.1332 1.87009 10.0001 1.87009C9.86702 1.87009 9.73715 1.91104 9.62814 1.98739C9.51912 2.06374 9.43624 2.17179 9.39074 2.29686L7.67199 6.62499C7.62819 6.74311 7.55092 6.84591 7.44964 6.92083C7.34836 6.99575 7.22745 7.03955 7.10168 7.04686L2.49231 7.34374C1.89074 7.3828 1.65637 8.15624 2.11731 8.53905L5.64856 11.4844C5.74726 11.566 5.82089 11.6738 5.86097 11.7954C5.90106 11.9171 5.90596 12.0476 5.87512 12.1719L4.82043 16.3281C4.64074 17.0312 5.39074 17.6016 5.99231 17.2187L9.65637 14.8984C9.75912 14.8331 9.87836 14.7984 10.0001 14.7984C10.1219 14.7984 10.2411 14.8331 10.3439 14.8984Z"
-                                        fill="#3887CD" />
-                                </svg>
-                            </a>
-                            <a href=""><svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M10.3439 14.8984L14.2814 17.3984C14.7892 17.7187 15.4142 17.2422 15.2657 16.6562L14.1251 12.1719C14.0943 12.0476 14.0992 11.9171 14.1393 11.7954C14.1793 11.6738 14.253 11.566 14.3517 11.4844L17.8829 8.53905C18.3439 8.15624 18.1095 7.3828 17.5079 7.34374L12.8986 7.04686C12.7728 7.03955 12.6519 6.99575 12.5506 6.92083C12.4493 6.84591 12.372 6.74311 12.3282 6.62499L10.6095 2.29686C10.564 2.17179 10.4811 2.06374 10.3721 1.98739C10.2631 1.91104 10.1332 1.87009 10.0001 1.87009C9.86702 1.87009 9.73715 1.91104 9.62814 1.98739C9.51912 2.06374 9.43624 2.17179 9.39074 2.29686L7.67199 6.62499C7.62819 6.74311 7.55092 6.84591 7.44964 6.92083C7.34836 6.99575 7.22745 7.03955 7.10168 7.04686L2.49231 7.34374C1.89074 7.3828 1.65637 8.15624 2.11731 8.53905L5.64856 11.4844C5.74726 11.566 5.82089 11.6738 5.86097 11.7954C5.90106 11.9171 5.90596 12.0476 5.87512 12.1719L4.82043 16.3281C4.64074 17.0312 5.39074 17.6016 5.99231 17.2187L9.65637 14.8984C9.75912 14.8331 9.87836 14.7984 10.0001 14.7984C10.1219 14.7984 10.2411 14.8331 10.3439 14.8984Z"
-                                        fill="#3887CD" />
-                                </svg>
-                            </a>
-                            <a href=""><svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M10.3439 14.8984L14.2814 17.3984C14.7892 17.7187 15.4142 17.2422 15.2657 16.6562L14.1251 12.1719C14.0943 12.0476 14.0992 11.9171 14.1393 11.7954C14.1793 11.6738 14.253 11.566 14.3517 11.4844L17.8829 8.53905C18.3439 8.15624 18.1095 7.3828 17.5079 7.34374L12.8986 7.04686C12.7728 7.03955 12.6519 6.99575 12.5506 6.92083C12.4493 6.84591 12.372 6.74311 12.3282 6.62499L10.6095 2.29686C10.564 2.17179 10.4811 2.06374 10.3721 1.98739C10.2631 1.91104 10.1332 1.87009 10.0001 1.87009C9.86702 1.87009 9.73715 1.91104 9.62814 1.98739C9.51912 2.06374 9.43624 2.17179 9.39074 2.29686L7.67199 6.62499C7.62819 6.74311 7.55092 6.84591 7.44964 6.92083C7.34836 6.99575 7.22745 7.03955 7.10168 7.04686L2.49231 7.34374C1.89074 7.3828 1.65637 8.15624 2.11731 8.53905L5.64856 11.4844C5.74726 11.566 5.82089 11.6738 5.86097 11.7954C5.90106 11.9171 5.90596 12.0476 5.87512 12.1719L4.82043 16.3281C4.64074 17.0312 5.39074 17.6016 5.99231 17.2187L9.65637 14.8984C9.75912 14.8331 9.87836 14.7984 10.0001 14.7984C10.1219 14.7984 10.2411 14.8331 10.3439 14.8984Z"
-                                        fill="#3887CD" />
-                                </svg>
-                            </a>
-                            <a href=""><svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M10.3439 14.8984L14.2814 17.3984C14.7892 17.7187 15.4142 17.2422 15.2657 16.6562L14.1251 12.1719C14.0943 12.0476 14.0992 11.9171 14.1393 11.7954C14.1793 11.6738 14.253 11.566 14.3517 11.4844L17.8829 8.53905C18.3439 8.15624 18.1095 7.3828 17.5079 7.34374L12.8986 7.04686C12.7728 7.03955 12.6519 6.99575 12.5506 6.92083C12.4493 6.84591 12.372 6.74311 12.3282 6.62499L10.6095 2.29686C10.564 2.17179 10.4811 2.06374 10.3721 1.98739C10.2631 1.91104 10.1332 1.87009 10.0001 1.87009C9.86702 1.87009 9.73715 1.91104 9.62814 1.98739C9.51912 2.06374 9.43624 2.17179 9.39074 2.29686L7.67199 6.62499C7.62819 6.74311 7.55092 6.84591 7.44964 6.92083C7.34836 6.99575 7.22745 7.03955 7.10168 7.04686L2.49231 7.34374C1.89074 7.3828 1.65637 8.15624 2.11731 8.53905L5.64856 11.4844C5.74726 11.566 5.82089 11.6738 5.86097 11.7954C5.90106 11.9171 5.90596 12.0476 5.87512 12.1719L4.82043 16.3281C4.64074 17.0312 5.39074 17.6016 5.99231 17.2187L9.65637 14.8984C9.75912 14.8331 9.87836 14.7984 10.0001 14.7984C10.1219 14.7984 10.2411 14.8331 10.3439 14.8984Z"
-                                        fill="#3887CD" />
-                                </svg>
-                            </a>
-
-                        </div>
-                    </div> -->
                     <h2>{{ $productdetails->name }}</h2>
                     <p>{{ $productdetails->overview }}</p>
                     <div class="product_man">
@@ -375,45 +248,6 @@
                     @endif
 
 
-                    @if ($productdetails->stock_status > 0)
-                        <form class="add-to-cart-form mt-2" data-product-id="{{ $productdetails->id }}">
-                            @csrf
-                            <div class="pr_btn">
-                                <div class="input-add d-flex">
-                                    <span class="input-group-btn">
-                                        <button type="button" class="btn btn-default btn-number" data-type="minus"
-                                            data-field="qty" disabled="disabled">
-                                            <span class="glyphicon glyphicon-minus">-</span>
-                                        </button>
-                                    </span>
-                                    <input type="text" name="qty" class="form-control input-number" value="1"
-                                        min="1" max="10">
-                                    <span class="input-group-btn">
-                                        <button type="button" class="btn btn-default btn-number" data-type="plus"
-                                            data-field="qty">
-                                            <span class="glyphicon glyphicon-plus">+</span>
-                                        </button>
-                                    </span>
-                                </div>
-
-                                @if (!Auth::guard('local')->check())
-                                    <a href="{{ route('sign_in') }}" class="btn btn-primary mt-2 w-100">Add to Cart</a>
-                                @else
-                                    <button type="submit" class="btn btn-primary">
-                                        <font style="vertical-align: inherit;">
-                                            <font style="vertical-align: inherit;">أضف إلى السلة</font>
-                                        </font>
-                                    </button>
-                                @endif
-                            </div>
-                        </form>
-                    @else
-                        <div class="mt-4" style="color: red; font-weight: bold; font-size: 1.5rem;">
-                            نفد من المخزون
-                        </div>
-                    @endif
-                    
-                    
                     <div class="select_p">
                         {{-- <select class="form-select" aria-label="Default select example" style="    background-position: left .75rem center;
     padding: .375rem .75rem .375rem 2.25rem;background-color: #F0F2F3; color:#464748;border: none;">
@@ -444,62 +278,42 @@
                             </option>
                         </select> --}}
                     </div>
-                   @if($productdetails->stock_status == 0)
-    <button type="button" class="btn btn-secondary mt-0" disabled>Out of Stock</button>
-@else
-    <form action="{{ route('add_tocart', $productdetails->id) }}" method="POST">
-        @csrf
-        <div class="pr_btn">
-            @if(!Auth::guard('local')->check())
-                <button type="submit" class="btn btn-primary mt-0"><a href="{{route('sign_in')}}" style="color: white;">Add to Cart</a></button>
-            @else
-                <button type="submit" class="btn btn-primary mt-0">Add to Cart</button>
-            @endif
-
-            <input type="hidden" name="price" value="{{ $productdetails->normal_price }}">
-            <input type="hidden" name="name" value="{{ $productdetails->name}}">
-            <input type="hidden" name="selected_colors" id="selectedColorsInput">
-            <div class="input-add d-flex">
-                <span class="input-group-btn">
-                    <button type="button" class="btn btn-default btn-number" data-type="minus" data-field="qty" disabled="disabled">
-                        <span class="glyphicon glyphicon-minus">-</span>
-                    </button>
-                </span>
-                <input type="text" name="qty" class="form-control input-number" value="1" min="1" max="10">
-                <span class="input-group-btn">
-                    <button type="button" class="btn btn-default btn-number" data-type="plus" data-field="qty">
-                        <span class="glyphicon glyphicon-plus">+</span>
-                    </button>
-                </span>
-            </div>
-        </div>
-    </form>
-@endif
-
-                    <!--  <div class="select_pr">
-                            <h4 style="font-weight:400 !important;">{{ $productdetails->measurements }}</h4>
-                            <button type="button" class="btn btn-addcard" id="btnn">أضف إلى البطاقة
-                                <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M8.75 20.25C8.75 20.6642 8.41421 21 8 21C7.58579 21 7.25 20.6642 7.25 20.25C7.25 19.8358 7.58579 19.5 8 19.5C8.41421 19.5 8.75 19.8358 8.75 20.25Z" fill="white" stroke="white" stroke-width="1.5"/>
-                                    <path d="M18.5 20.25C18.5 20.6642 18.1642 21 17.75 21C17.3358 21 17 20.6642 17 20.25C17 19.8358 17.3358 19.5 17.75 19.5C18.1642 19.5 18.5 19.8358 18.5 20.25Z" fill="white" stroke="white" stroke-width="1.5"/>
-                                    <path d="M4.46562 6.75H21.2844L18.8094 15.4125C18.7211 15.7269 18.532 16.0036 18.2711 16.2C18.0103 16.3965 17.6922 16.5019 17.3656 16.5H8.38437C8.05783 16.5019 7.7397 16.3965 7.47886 16.2C7.21803 16.0036 7.02893 15.7269 6.94062 15.4125L3.54688 3.54375C3.50203 3.38696 3.4073 3.24905 3.27704 3.15093C3.14677 3.05282 2.98808 2.99983 2.825 3H1.25" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>                                    
-                            </button>
-                            <div class="input-add d-flex">
-                                <span class="input-group-btn">
-                                    <button type="button" class="btn btn-default btn-number" disabled="disabled" data-type="minus" data-field="quant[1]">
-                                        <span class="glyphicon glyphicon-minus">-</span>
-                                    </button>
-                                </span>
-                                <input type="text" name="quant[1]" class="form-control input-number" value="1" min="1" max="10">
-                                <span class="input-group-btn">
-                                    <button type="button" class="btn btn-default btn-number" data-type="plus" data-field="quant[1]">
-                                        <span class="glyphicon glyphicon-plus">+</span>
-                                    </button>
-                                </span>
+                   @if($productdetails->stock_status > 0)
+                        <form action="{{ route('add_tocart', $productdetails->id) }}" method="POST" class="mt-3">
+                            @csrf
+                            <div class="pr_btn">
+                                @if(!Auth::guard('local')->check())
+                                    <a href="{{route('sign_in')}}" class="btn btn-primary">Add to Cart</a>
+                                @else
+                                    <button type="submit" class="btn btn-primary">Add to Cart</button>
+                                @endif
+                                <div class="input-add d-flex">
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-default btn-number" data-type="plus" data-field="qty">
+                                            <span class="glyphicon glyphicon-plus">+</span>
+                                        </button>
+                                    </span>
+                                    <input type="text" name="qty" class="form-control input-number" value="1" min="1" max="10">
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-default btn-number" data-type="minus" data-field="qty" disabled="disabled">
+                                            <span class="glyphicon glyphicon-minus">-</span>
+                                        </button>
+                                    </span>
+                                </div>
                             </div>
+                            <input type="hidden" name="price" value="{{ $productdetails->normal_price }}">
+                            <input type="hidden" name="name" value="{{ $productdetails->name}}">
+                            <input type="hidden" name="selected_colors" id="selectedColorsInput">
+                        </form>
+                    @else
+                        <div class="mt-4" style="color: red; font-weight: bold; font-size: 1.5rem;">
+                            نفد من المخزون
+                        </div>
+                    @endif
 
-                        </div> -->
+                    <div class="warrent_images d-flex mt-3">
+                        <img src="{{asset('stc_css/images/months_warranty.png')}}">
+                    </div>
                 </div>
             </div>
 
