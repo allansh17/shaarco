@@ -33,6 +33,34 @@
     pointer-events: none; /* Disable interactions */
 }
 
+/* Fix for lightSlider image zooming issue */
+#mainDisplay {
+    height: 100% !important;
+    object-fit: contain !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+}
+
+/* Ensure all product images maintain proper aspect ratio */
+.card_images img {
+    height: 100% !important;
+    object-fit: contain !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+}
+
+/* Force consistent image display in lightSlider */
+.lSSlideWrapper.usingCss img,
+.lSSlideOuter .lightSlider img,
+#lightSlider img {
+    height: 100% !important;
+    object-fit: contain !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+}
 
 </style>
 <!-- CSS for Selected Color -->
@@ -701,34 +729,70 @@
    
     <script>
         $(document).ready(function () {
-            const sliderOptions = {
-                gallery: true,
-                item: 1,
-                loop: true,
-                slideMargin: 0,
-                rtl: true,
-                thumbItem: 6
-            };
-    
-            $('#lightSlider').lightSlider(sliderOptions);
-    
-            $(".thumbnail").click(function () {
-                var src = $(this).attr("src");  // Get the src of the clicked image
-                console.log("Clicked image source:", src); // Debug log
-    
-                var type = $(this).prop("tagName");  // Check if it's an image or video (tag name)
-    
-                // Update the main display based on whether it's an image or video
-                if (type === "IMG") {
-                    $("#mainDisplay").replaceWith('<img id="mainDisplay" src="' + src + '" alt="Product Image" />');
-                } else if (type === "VIDEO") {
-                    var videoElement = '<video id="mainDisplay" width="640" height="360" controls autoplay>' +
-                                        '<source src="' + src + '" type="video/mp4">' +
-                                        'Your browser does not support the video tag.' +
-                                        '</video>';
-                    $("#mainDisplay").replaceWith(videoElement);
-                }
-            });
+            // Wait a bit for all resources to load
+            setTimeout(function() {
+                const sliderOptions = {
+                    gallery: true,
+                    item: 1,
+                    loop: true,
+                    slideMargin: 0,
+                    rtl: true,
+                    thumbItem: 6,
+                    onBeforeStart: function (el) {
+                        // Ensure images are properly sized before slider starts
+                        el.find('img').each(function() {
+                            $(this).css({
+                                'height': '100%',
+                                'object-fit': 'contain',
+                                'width': '100%',
+                                'max-width': '100%',
+                                'max-height': '100%'
+                            });
+                        });
+                    },
+                    onAfterStart: function (el) {
+                        // Additional fix after slider starts
+                        el.find('img').each(function() {
+                            $(this).css({
+                                'height': '100%',
+                                'object-fit': 'contain',
+                                'width': '100%',
+                                'max-width': '100%',
+                                'max-height': '100%'
+                            });
+                        });
+                    }
+                };
+        
+                $('#lightSlider').lightSlider(sliderOptions);
+        
+                // Ensure images maintain proper aspect ratio
+                $('#lightSlider img').css({
+                    'height': '100%',
+                    'object-fit': 'contain',
+                    'width': '100%',
+                    'max-width': '100%',
+                    'max-height': '100%'
+                });
+        
+                $(".thumbnail").click(function () {
+                    var src = $(this).attr("src");  // Get the src of the clicked image
+                    console.log("Clicked image source:", src); // Debug log
+        
+                    var type = $(this).prop("tagName");  // Check if it's an image or video (tag name)
+        
+                    // Update the main display based on whether it's an image or video
+                    if (type === "IMG") {
+                        $("#mainDisplay").replaceWith('<img id="mainDisplay" src="' + src + '" alt="Product Image" style="height: 100%; object-fit: contain; width: 100%; max-width: 100%; max-height: 100%;" />');
+                    } else if (type === "VIDEO") {
+                        var videoElement = '<video id="mainDisplay" width="640" height="360" controls autoplay style="height: 100%; object-fit: contain; width: 100%; max-width: 100%; max-height: 100%;">' +
+                                            '<source src="' + src + '" type="video/mp4">' +
+                                            'Your browser does not support the video tag.' +
+                                            '</video>';
+                        $("#mainDisplay").replaceWith(videoElement);
+                    }
+                });
+            }, 100); // Small delay to ensure everything is loaded
         });
     </script>
 

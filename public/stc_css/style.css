@@ -1160,10 +1160,41 @@ ul.pagination {
     height: 460px;
     margin-bottom: 15px;
 }
+
+/* Fix for lightSlider image zooming issue */
 .lSSlideWrapper.usingCss li.lslide.active img{
-    height: 100%;
-    object-fit: contain;
-    width: 100%;
+    height: 100% !important;
+    object-fit: contain !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+}
+
+/* Additional rules to prevent zooming issues */
+.lSSlideWrapper.usingCss li.lslide img {
+    height: 100% !important;
+    object-fit: contain !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+}
+
+/* Ensure all lightSlider images maintain proper aspect ratio */
+#lightSlider li img {
+    height: 100% !important;
+    object-fit: contain !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+}
+
+/* Force consistent image display */
+.lSSlideOuter .lightSlider li img {
+    height: 100% !important;
+    object-fit: contain !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
 }
 
 ul#lightSlider {
