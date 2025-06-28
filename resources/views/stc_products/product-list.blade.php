@@ -115,16 +115,12 @@
     @endforeach
 </div>
 
-                        <!-- div class="select_filter">
-                            <h4>علامات تجارية</h4>
-                            @foreach ($brands as $brand)
-                                <div class="form-check-f">
-                                    <input class="form-check-input" type="checkbox" name="brands[]" value="{{ $brand->id }}"
-                                        id="brand-{{ $brand->id }}" @if(in_array($brand->id, $selectedBrands)) checked @endif>
-                                    <label class="form-check-label" for="brand-{{ $brand->id }}">{{ $brand->name }}</label>
-                                </div>
-                            @endforeach
-                        </div> -->
+                        <!-- Clear Filters Button -->
+                        <div class="clear-filters-section" style="margin-top: 20px; margin-bottom: 20px;">
+                            <button type="button" id="clearFiltersBtn" class="btn btn-outline-secondary w-100">
+                                مسح الفلاتر
+                            </button>
+                        </div>
 
                         <!-- Category Filters -->
                         <div class="select_filter">
@@ -504,6 +500,37 @@
                     selectedSubCategories = [];
                 }
 
+                submitForm();
+            });
+
+            // Clear Filters Button functionality
+            $('#clearFiltersBtn').click(function() {
+                // Uncheck all brand checkboxes
+                $('input[name="brands[]"]').prop('checked', false);
+                
+                // Uncheck all category checkboxes
+                $('input[name="categories[]"]').prop('checked', false);
+                
+                // Uncheck all subcategory checkboxes
+                $('input[name="subcategories[]"]').prop('checked', false);
+                
+                // Clear search query
+                $('#searchBox1').val('');
+                $('#hiddenSearchQuery').val('');
+                
+                // Reset filter select to "All Products"
+                $('#filterSelect').val('all');
+                
+                // Hide category and subcategory containers
+                categoryContainer.style.display = "none";
+                subcategoryContainer.style.display = "none";
+                
+                // Clear the selected arrays
+                selectedBrands = [];
+                selectedCategories = [];
+                selectedSubCategories = [];
+                
+                // Submit the form to refresh the page with cleared filters
                 submitForm();
             });
 
