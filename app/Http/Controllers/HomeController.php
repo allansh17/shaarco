@@ -219,10 +219,10 @@ class HomeController extends Controller
     $selectedBrands = $request->input('brands', []);
 
     // Define the base query for products
-    $productsQuery = Product::with(['category', 'subcategory', 'brands']) // Eager load relationships
-        ->whereNull('deleted_at'); // Soft deletes handle karna
+    $productsQuery = Product::with(['category', 'subcategory', 'brands'])
+        ->whereNull('deleted_at');
 
-    // 🟢 **Apply Search Query (Name, Code, Category, Subcategory, Brand)**
+    // Search Query (Name, Code, Category, Subcategory, Brand)
     if (!empty($query)) {
         $productsQuery->where(function ($q) use ($query) {
             $q->where('name', 'like', "%{$query}%")
@@ -239,7 +239,7 @@ class HomeController extends Controller
         });
     }
 
-    // 🟢 **Apply Second Search Query (Name, Measurements, Code)**
+    // Second Search Query (Name, Measurements, Code)
     if (!empty($query1)) {
         $productsQuery->where(function ($q) use ($query1) {
             $q->where('name', 'like', "%{$query1}%")
@@ -248,35 +248,45 @@ class HomeController extends Controller
         });
     }
 
-    // 🟢 **Apply Category Filter (Multiple categories using FIND_IN_SET)**
-    if (!empty($selectedCategories)) {
-        $categoryConditions = implode(',', array_fill(0, count($selectedCategories), '?'));
-        $productsQuery->whereRaw("EXISTS (SELECT 1 FROM category WHERE FIND_IN_SET(category.id, products.category_id) AND category.id IN ($categoryConditions))", $selectedCategories);
+    // --- INCLUSIVE FILTER LOGIC ---
+    // If both categories and subcategories are selected, show products that match EITHER
+    if (!empty($selectedCategories) && !empty($selectedSubcategories)) {
+        $productsQuery->where(function ($q) use ($selectedCategories, $selectedSubcategories) {
+            $categoryConditions = implode(',', array_fill(0, count($selectedCategories), '?'));
+            $subcategoryConditions = implode(',', array_fill(0, count($selectedSubcategories), '?'));
+            $q->whereRaw("EXISTS (SELECT 1 FROM category WHERE FIND_IN_SET(category.id, products.category_id) AND category.id IN ($categoryConditions))", $selectedCategories)
+              ->orWhereRaw("EXISTS (SELECT 1 FROM subcategory WHERE FIND_IN_SET(subcategory.id, products.subcategory_id) AND subcategory.id IN ($subcategoryConditions))", $selectedSubcategories);
+        });
+    } else {
+        // Only categories selected
+        if (!empty($selectedCategories)) {
+            $categoryConditions = implode(',', array_fill(0, count($selectedCategories), '?'));
+            $productsQuery->whereRaw("EXISTS (SELECT 1 FROM category WHERE FIND_IN_SET(category.id, products.category_id) AND category.id IN ($categoryConditions))", $selectedCategories);
+        }
+        // Only subcategories selected
+        if (!empty($selectedSubcategories)) {
+            $subcategoryConditions = implode(',', array_fill(0, count($selectedSubcategories), '?'));
+            $productsQuery->whereRaw("EXISTS (SELECT 1 FROM subcategory WHERE FIND_IN_SET(subcategory.id, products.subcategory_id) AND subcategory.id IN ($subcategoryConditions))", $selectedSubcategories);
+        }
     }
 
-    // 🟢 **Apply Subcategory Filter (Multiple subcategories using FIND_IN_SET)**
-    if (!empty($selectedSubcategories)) {
-        $subcategoryConditions = implode(',', array_fill(0, count($selectedSubcategories), '?'));
-        $productsQuery->whereRaw("EXISTS (SELECT 1 FROM subcategory WHERE FIND_IN_SET(subcategory.id, products.subcategory_id) AND subcategory.id IN ($subcategoryConditions))", $selectedSubcategories);
-    }
-
-    // 🟢 **Apply Brand Filter**
+    // Brand Filter
     if (!empty($selectedBrands)) {
         $productsQuery->whereIn('brands', $selectedBrands);
     }
 
-    // 🟢 **Sort by newest first**
+    // Sort by newest first
     $productsQuery->orderBy('created_at', 'desc');
 
-    // 🟢 **Paginate Products (24 Per Page)**
+    // Paginate Products (24 Per Page)
     $allProducts = $productsQuery->paginate(24);
 
-    // 🟢 **Fetch Brands, Categories & Subcategories for Filters**
+    // Fetch Brands, Categories & Subcategories for Filters
     $brands = Brands::all();
     $categories = Category::all();
     $subcategories = SubCategory::all();
 
-    // 🟢 **Return View with Data**
+    // Return View with Data
     return view('stc_products.product-list', compact(
         'allProducts',
         'brands',
