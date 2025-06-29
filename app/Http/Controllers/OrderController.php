@@ -278,6 +278,7 @@ class OrderController extends Controller
 
 
 
+
                 $view = '';
                 // $view = '<a href="javascript:void(0)" onclick="viewItem('.$value->id.')" data-toggle="tooltip" title="View"><i class="ik ik-eye f-16 text-green mr-1"></i></a> ';
                 // if (Auth::user()->can('customer_view')) {
@@ -568,18 +569,7 @@ class OrderController extends Controller
             $customer_id = $Id->customer_id;
             $data = array();
             $data['order'] = $orders =  Checkout::select('checkouts.*', 'customers.first_name', 'customers.last_name', 'customers.image as profileImage', 'customers.email', 'customers.phone', 'customers.user_type')->join('customers', 'customers.id', 'checkouts.user_id')->findOrFail($id);
-            
-            // Modified query to handle both checkout_id and order_id scenarios
-            $data['product_order'] = $p_orders = ProductOrder::select('product_orders.*', 'products.*', 'category.name as category_name','brands.name as brand_name')
-                ->join('products', 'products.id', 'product_orders.product_id')
-                ->leftJoin('category', 'category.id', 'products.category_id')
-                ->leftJoin('brands', 'brands.id', '=', 'products.brands')
-                ->where(function($query) use ($id) {
-                    $query->where('product_orders.checkout_id', $id)
-                          ->orWhere('product_orders.order_id', $id);
-                })
-                ->get();
-                
+            $data['product_order'] = $p_orders = ProductOrder::select('product_orders.*', 'products.*', 'category.name as category_name','brands.name as brand_name')->join('products', 'products.id', 'product_orders.product_id')->leftJoin('category', 'category.id', 'products.category_id')->leftJoin('brands', 'brands.id', '=', 'products.brands') ->where('checkout_id', $id)->get();
             $data['shipping_address'] = CustomerAddress::select('*')->where('id', $orders->customer_address_id)->first();
             $data['billing_address'] = CustomerAddress::select('*')->where('id', $orders->customer_billingaddress_id)->first();
             $data['total_order'] = Checkout::where('user_id', $customer_id)->count();

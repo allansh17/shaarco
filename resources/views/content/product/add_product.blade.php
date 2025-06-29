@@ -115,15 +115,19 @@
                 @php
                     // Check if this category is currently selected for this product
                     $isCurrentlySelected = in_array($category_data->id, $selectedCategoryIds);
+                    // Check if this category has the selected brand
+                    $hasSelectedBrand = $category_data->brands->contains('id', $product_detail->brands);
                 @endphp
-                <option value="{{$category_data->id}}" 
-                    {{ $isCurrentlySelected ? 'selected' : '' }}>
-                    {{$category_data->name}}
-                </option>
+                @if($hasSelectedBrand || $isCurrentlySelected)
+                    <option value="{{$category_data->id}}" 
+                        {{ $isCurrentlySelected ? 'selected' : '' }}>
+                        {{$category_data->name}}
+                        @if($isCurrentlySelected && !$hasSelectedBrand)
+                            (currently selected)
+                        @endif
+                    </option>
+                @endif
             @endforeach
-        @else
-            {{-- For new products, categories will be loaded dynamically via JavaScript when brand is selected --}}
-            <option value="" disabled>Please select a brand first</option>
         @endif
     </select>
     <div class="fv-plugins-message-container fv-plugins-message-container--enabled invalid-feedback"></div>
