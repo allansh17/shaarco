@@ -568,7 +568,7 @@ class OrderController extends Controller
             $customer_id = $Id->customer_id;
             $data = array();
             $data['order'] = $orders =  Checkout::select('checkouts.*', 'customers.first_name', 'customers.last_name', 'customers.image as profileImage', 'customers.email', 'customers.phone', 'customers.user_type')->join('customers', 'customers.id', 'checkouts.user_id')->findOrFail($id);
-            $data['product_order'] = $p_orders = ProductOrder::select('product_orders.*', 'products.*', 'category.name as category_name','brands.name as brand_name')->join('products', 'products.id', 'product_orders.product_id')->join('category', 'category.id', 'products.category_id')->join('brands', 'brands.id', '=', 'products.brands') ->where('checkout_id', $id)->get();
+            $data['product_order'] = $p_orders = ProductOrder::select('product_orders.*', 'products.*', 'category.name as category_name','brands.name as brand_name')->join('products', 'products.id', 'product_orders.product_id')->leftJoin('category', 'category.id', 'products.category_id')->leftJoin('brands', 'brands.id', '=', 'products.brands') ->where('checkout_id', $id)->get();
             $data['shipping_address'] = CustomerAddress::select('*')->where('id', $orders->customer_address_id)->first();
             $data['billing_address'] = CustomerAddress::select('*')->where('id', $orders->customer_billingaddress_id)->first();
             $data['total_order'] = Checkout::where('user_id', $customer_id)->count();

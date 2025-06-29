@@ -113,20 +113,13 @@
             @endphp
             @foreach($category as $category_data)
                 @php
-                    // Check if this category has the selected brand
-                    $hasSelectedBrand = $category_data->brands->contains('id', $product_detail->brands);
                     // Check if this category is currently selected for this product
                     $isCurrentlySelected = in_array($category_data->id, $selectedCategoryIds);
                 @endphp
-                @if($hasSelectedBrand || $isCurrentlySelected)
-                    <option value="{{$category_data->id}}" 
-                        {{ $isCurrentlySelected ? 'selected' : '' }}>
-                        {{$category_data->name}}
-                        @if($isCurrentlySelected && !$hasSelectedBrand)
-                            (currently selected)
-                        @endif
-                    </option>
-                @endif
+                <option value="{{$category_data->id}}" 
+                    {{ $isCurrentlySelected ? 'selected' : '' }}>
+                    {{$category_data->name}}
+                </option>
             @endforeach
         @else
             {{-- For new products, categories will be loaded dynamically via JavaScript when brand is selected --}}
