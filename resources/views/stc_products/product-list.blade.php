@@ -289,7 +289,7 @@
                 </div> -->
 
                     <div class="pagination_list">
-                        {{ $allProducts->links('pagination::bootstrap-4') }}
+                        {{ $allProducts->appends(request()->except('page'))->links('pagination::bootstrap-4') }}
                     </div>
 
                 </div>
