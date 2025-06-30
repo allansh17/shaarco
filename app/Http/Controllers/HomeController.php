@@ -422,13 +422,13 @@ public function getproducts($id, Request $request)
 
     // Define the base query for products
     $productsQuery = DB::table('products')
-        ->join('category', function ($join) {
+        ->leftJoin('category', function ($join) {
             $join->on(DB::raw('FIND_IN_SET(category.id, products.category_id)'), '>', DB::raw('0'));
         })
-        ->join('subcategory', function ($join) {
+        ->leftJoin('subcategory', function ($join) {
             $join->on(DB::raw('FIND_IN_SET(subcategory.id, products.subcategory_id)'), '>', DB::raw('0'));
         })
-        ->join('brands', 'products.brands', '=', 'brands.id')
+        ->leftJoin('brands', 'products.brands', '=', 'brands.id')
         ->select('products.*', 
                  DB::raw('GROUP_CONCAT(DISTINCT category.name) as category_names'),
                  DB::raw('GROUP_CONCAT(DISTINCT subcategory.name) as subcategory_names'),
