@@ -8,6 +8,9 @@
 # Ignore all .log files
 .log
 
+# Ignore uploads folder
+/public/uploads
+
 /node_modules
 /public/hot
 /public/storage
