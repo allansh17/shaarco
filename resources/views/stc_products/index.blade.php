@@ -11,13 +11,16 @@
         border-radius: 12px;
         display: block;
     }
-    /* Shop by categories images: fill the box */
+    /* Shop by categories images: uniform and well-fitted */
     .shop_cat .brand_img img {
         width: 100%;
         height: 180px;
-        object-fit: cover;
+        object-fit: contain;
         border-radius: 12px;
         display: block;
+        background: #fff;
+        padding: 10px;
+        box-sizing: border-box;
     }
     /* Best brands logos: larger, centered, contained */
     .brands_section:not(.shop_cat) .brand_carousel .brand_img img {
