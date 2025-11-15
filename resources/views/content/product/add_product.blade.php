@@ -2210,9 +2210,7 @@
                         //console.log(response);
                         if (response.code == 200) {
                             toastr.success(response.msg);
-                            setTimeout(function () {
-                                window.location.href = "{{url('product')}}";
-                            }, 3000);
+                            window.location.href = "{{url('product')}}";
                         } else {
                             toastr.error(response.msg, "error");
                             $("#addEditForm").find('.submit_button').attr("disabled", false);
