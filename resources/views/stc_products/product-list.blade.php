@@ -71,6 +71,64 @@
         font-weight: bold;
     }
 
+    /* Mobile pagination fixes */
+    .pagination_list {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 10px 0;
+    }
+
+    .pagination_list .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .pagination_list .pagination .page-item {
+        margin: 2px;
+        display: inline-block;
+    }
+
+    .pagination_list .pagination .page-link {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.875rem;
+        min-width: 36px;
+        text-align: center;
+    }
+
+    /* On mobile, reduce padding and font size */
+    @media (max-width: 768px) {
+        .pagination_list {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        .pagination_list .pagination {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        .pagination_list .pagination .page-link {
+            padding: 0.25rem 0.4rem;
+            font-size: 0.8rem;
+            min-width: 32px;
+        }
+    }
+
+    /* On very small screens, make it even more compact */
+    @media (max-width: 576px) {
+        .pagination_list .pagination .page-link {
+            padding: 0.2rem 0.35rem;
+            font-size: 0.75rem;
+            min-width: 28px;
+        }
+    }
+
 </style>
 
 <div class="breadcrumb_card">
