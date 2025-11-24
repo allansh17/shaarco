@@ -626,6 +626,27 @@
                 menu.style.display = 'none';
             }
         });
+
+        // Close mobile navbar menu when scrolling
+        window.addEventListener('scroll', function() {
+            const navbarCollapse = document.getElementById('navbarNav');
+            if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+                // Try Bootstrap's collapse method first
+                if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
+                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse) || new bootstrap.Collapse(navbarCollapse, { toggle: false });
+                    bsCollapse.hide();
+                } else {
+                    // Fallback: manually remove show class and update aria attributes
+                    navbarCollapse.classList.remove('show');
+                    navbarCollapse.setAttribute('aria-expanded', 'false');
+                    const navbarToggler = document.querySelector('[data-bs-target="#navbarNav"]');
+                    if (navbarToggler) {
+                        navbarToggler.setAttribute('aria-expanded', 'false');
+                        navbarToggler.classList.add('collapsed');
+                    }
+                }
+            }
+        }, { passive: true });
     </script>
 
 
