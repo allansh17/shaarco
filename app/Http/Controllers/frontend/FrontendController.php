@@ -232,8 +232,69 @@ class FrontendController extends Controller
     {
         $userId = $request->input('user_id');
         
-        // Retrieve cart data for the specific user
-        $cartData = Cart::where('user_id', $userId)->get(); // This will return all products for the user
+        // For logged-in users, use database Cart table (no size limit)
+        // For guests, use cookie cart
+        if ($userId) {
+            $cartItems = Cart::where('user_id', $userId)->get();
+            
+            $cartData = [];
+            foreach ($cartItems as $item) {
+                // Skip if product doesn't exist or is soft-deleted
+                $product = Product::find($item->product_id);
+                if (!$product || $product->trashed()) {
+                    // Skip invalid/deleted products
+                    continue;
+                }
+                
+                $cartData[] = [
+                    'product_id' => $item->product_id,
+                    'qty' => $item->qty,
+                    'price' => $item->price ?? 0,
+                    'total_price' => $item->total_price ?? 0,
+                    'user_id' => $userId
+                ];
+            }
+            
+            // Using database cart for logged-in user (no size limit)
+        } else {
+            // Guest user - use cookie cart
+            $cartCookie = Cookie::get('cart', '[]');
+            $cart = json_decode($cartCookie, true);
+            
+            // Ensure cart is an array
+            if (!is_array($cart)) {
+                $cart = [];
+            }
+            
+            // Using cookie cart for guest user
+            
+            // Convert cookie cart format to match database Cart format
+            $cartData = [];
+            foreach ($cart as $item) {
+                // Validate item structure
+                if (!isset($item['product_id']) || !isset($item['quantity'])) {
+                    // Skip invalid item structure
+                    continue;
+                }
+                
+                // Skip if product doesn't exist or is soft-deleted
+                $product = Product::find($item['product_id']);
+                if (!$product || $product->trashed()) {
+                    // Skip invalid/deleted products
+                    continue;
+                }
+                
+                $cartData[] = [
+                    'product_id' => $item['product_id'],
+                    'qty' => $item['quantity'],
+                    'price' => $item['price_per_unit'] ?? 0,
+                    'total_price' => $item['price'] ?? 0,
+                    'user_id' => $userId
+                ];
+            }
+        }
+        
+        // Return cart data
 
         return response()->json($cartData);
     }
@@ -286,10 +347,53 @@ class FrontendController extends Controller
     $productIds = $request->input('product_id');  // Array of product IDs
     $quantities = $request->input('qty');          // Array of quantities
 
-    // Ensure that both arrays have the same length
-    // if (count($productIds) !== count($quantities)) {
-    //     return response()->json(['error' => 'Product IDs and quantities mismatch.'], 400);
-    // }
+    // Get current cart (source of truth - what user actually sees)
+    // For logged-in users, use database Cart table (no size limit)
+    // For guests, use cookie cart
+    if ($userId) {
+        $cartItems = Cart::where('user_id', $userId)->get();
+        $validProductIds = $cartItems->pluck('product_id')->toArray();
+        // Using database cart for logged-in user
+    } else {
+        $cookieCart = json_decode(Cookie::get('cart', '[]'), true);
+        if (!is_array($cookieCart)) {
+            $cookieCart = [];
+        }
+        $validProductIds = array_column($cookieCart, 'product_id');
+        // Using cookie cart for guest
+    }
+    
+    // Validate products against cart
+    
+    // Filter out any products that aren't in the current cookie cart
+    $filteredProductIds = [];
+    $filteredQuantities = [];
+    foreach ($productIds as $index => $productId) {
+        // Only allow products that are in the cookie cart
+        if (in_array($productId, $validProductIds)) {
+            // Also verify product exists and is not soft-deleted
+            $product = Product::find($productId);
+            if ($product && !$product->trashed()) {
+                $filteredProductIds[] = $productId;
+                $filteredQuantities[] = $quantities[$index];
+            } else {
+                // Skip invalid/deleted products
+            }
+        } else {
+            // Skip products not in cart
+        }
+    }
+    
+    // Use filtered arrays - only products from cookie cart
+    $productIds = $filteredProductIds;
+    $quantities = $filteredQuantities;
+    
+    // Use filtered products only
+    
+    // If no valid products, return error
+    if (empty($productIds)) {
+        return response()->json(['error' => 'No valid products in cart.'], 400);
+    }
 
     // Create a new Checkout entry
     $checkout = new Checkout();
@@ -302,12 +406,30 @@ class FrontendController extends Controller
 
     // Save the checkout entry
     $checkout->save();
+    
+    // Insert products into product_orders
     foreach ($productIds as $index => $productId) {
         DB::table('product_orders')->insert([
             'product_id' => $productId,
-            'checkout_id' => $checkout->id, // Use the checkout's ID
-            'qty' => $quantities[$index],   // Get the corresponding quantity for each product
+            'checkout_id' => $checkout->id,
+            'qty' => $quantities[$index],
         ]);
+    }
+    
+    // TEMPORARY FIX: Remove any products that weren't in our filtered list
+    $validProductIdsInt = array_map('intval', $productIds);
+    $invalidProducts = DB::table('product_orders')
+        ->where('checkout_id', $checkout->id)
+        ->whereNotIn('product_id', $validProductIdsInt)
+        ->pluck('product_id')
+        ->toArray();
+    
+    if (!empty($invalidProducts)) {
+        \Log::warning('saveInquiry - Removing invalid products that were auto-added:', ['invalid_product_ids' => $invalidProducts, 'checkout_id' => $checkout->id]);
+        DB::table('product_orders')
+            ->where('checkout_id', $checkout->id)
+            ->whereNotIn('product_id', $validProductIdsInt)
+            ->delete();
     }
     // Optionally, delete the cart data (if needed, assuming the data is no longer needed in the cart table)
     Cart::where('user_id', $userId)->delete();
