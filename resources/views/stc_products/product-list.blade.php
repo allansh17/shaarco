@@ -773,12 +773,20 @@
                         qty: quantity
                     },
                     success: function(response) {
-                        // Show success message
-                        alert('تمت اضافة الاصناف للسلة بنجاح، الرجاء استكمال ارسال الطلب في سلتك');
+                        // Show success toast notification
+                        toastr.success('تمت اضافة الاصناف للسلة بنجاح، الرجاء استكمال ارسال الطلب في سلتك', '', {
+                            timeOut: 1000,
+                            closeButton: false,
+                            progressBar: false
+                        });
                         // Optionally update cart count in header if you have one
                     },
                     error: function(xhr) {
-                        alert('Error adding product to cart. Please try again.');
+                        toastr.error('Error adding product to cart. Please try again.', '', {
+                            timeOut: 1000,
+                            closeButton: false,
+                            progressBar: false
+                        });
                     }
                 });
             });
