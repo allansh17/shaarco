@@ -810,6 +810,69 @@
                 // Submit the filter form
                 $('#filter-form').submit();
             });
+
+            // Make pagination ellipsis clickable
+            function makeEllipsisClickable() {
+                $('.pagination .page-item.disabled').each(function() {
+                    let $ellipsis = $(this);
+                    let $pageLink = $ellipsis.find('.page-link');
+                    
+                    // Check if it's an ellipsis (contains dots or is disabled without text)
+                    if ($pageLink.text().trim() === '...' || ($pageLink.text().trim() === '' && $ellipsis.hasClass('disabled'))) {
+                        // Remove disabled class and make it clickable
+                        $ellipsis.removeClass('disabled');
+                        $pageLink.css('cursor', 'pointer');
+                        
+                        // Find surrounding page numbers to calculate middle page
+                        let $prevPage = $ellipsis.prev('.page-item:not(.disabled)');
+                        let $nextPage = $ellipsis.next('.page-item:not(.disabled)');
+                        
+                        if ($prevPage.length && $nextPage.length) {
+                            let prevPageNum = parseInt($prevPage.find('.page-link').text()) || 0;
+                            let nextPageNum = parseInt($nextPage.find('.page-link').text()) || 0;
+                            
+                            // Calculate middle page
+                            let middlePage = Math.floor((prevPageNum + nextPageNum) / 2);
+                            
+                            // If middle page is same as prev or next, use prompt
+                            if (middlePage === prevPageNum || middlePage === nextPageNum) {
+                                middlePage = Math.floor((prevPageNum + nextPageNum) / 2) + 1;
+                            }
+                            
+                            // Make ellipsis clickable
+                            $pageLink.on('click', function(e) {
+                                e.preventDefault();
+                                
+                                // Show prompt to enter page number
+                                let targetPage = prompt('Enter page number:', middlePage);
+                                
+                                if (targetPage !== null && targetPage !== '') {
+                                    let pageNum = parseInt(targetPage);
+                                    if (!isNaN(pageNum) && pageNum > 0) {
+                                        // Get current URL and update page parameter
+                                        let url = new URL(window.location.href);
+                                        url.searchParams.set('page', pageNum);
+                                        window.location.href = url.toString();
+                                    }
+                                }
+                            });
+                            
+                            // Update ellipsis text to show it's clickable
+                            if ($pageLink.text().trim() === '') {
+                                $pageLink.html('...');
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Run on page load
+            makeEllipsisClickable();
+            
+            // Also run after pagination is updated (if using AJAX)
+            $(document).on('DOMNodeInserted', '.pagination', function() {
+                setTimeout(makeEllipsisClickable, 100);
+            });
         });
         </script>
 
