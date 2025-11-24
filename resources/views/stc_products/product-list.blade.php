@@ -757,6 +757,35 @@
                 input.closest(".input-add").find(".btn-number[data-type='plus']").prop("disabled", input.val() >= max);
             });
 
+            // Function to update cart count
+            function updateCartCount(quantityToAdd) {
+                quantityToAdd = parseInt(quantityToAdd) || 1;
+                
+                // Update desktop cart count
+                let $desktopCount = $('#desktop-cart-count');
+                let currentDesktopCount = parseInt($desktopCount.text()) || 0;
+                let newDesktopCount = currentDesktopCount + quantityToAdd;
+                
+                if (newDesktopCount > 0) {
+                    $desktopCount.text(newDesktopCount);
+                    $desktopCount.show();
+                } else {
+                    $desktopCount.hide();
+                }
+                
+                // Update mobile cart count
+                let $mobileCount = $('#mobile-cart-count');
+                let currentMobileCount = parseInt($mobileCount.text()) || 0;
+                let newMobileCount = currentMobileCount + quantityToAdd;
+                
+                if (newMobileCount > 0) {
+                    $mobileCount.text(newMobileCount);
+                    $mobileCount.show();
+                } else {
+                    $mobileCount.hide();
+                }
+            }
+
             // Handle form submission
             $(".add-to-cart-form").submit(function(e) {
                 e.preventDefault();
@@ -779,7 +808,9 @@
                             closeButton: false,
                             progressBar: false
                         });
-                        // Optionally update cart count in header if you have one
+                        
+                        // Update cart count
+                        updateCartCount(quantity);
                     },
                     error: function(xhr) {
                         toastr.error('Error adding product to cart. Please try again.', '', {

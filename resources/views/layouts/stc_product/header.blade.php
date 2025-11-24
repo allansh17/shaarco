@@ -330,7 +330,7 @@
                                 $totalItems = App\Helpers\CartHelper::getTotalItems();
                             @endphp
                             @if ($totalItems > 0)
-                                                            <span class="cart-count" style=" position: absolute;
+                                                            <span id="desktop-cart-count" class="cart-count" style=" position: absolute;
                                     top: -5px;
                                     right: -5px;
                                     background-color: #ffffff;
@@ -346,6 +346,8 @@
                                 ">
                                                                 {{ $totalItems }}
                                                             </span>
+                            @else
+                                <span id="desktop-cart-count" class="cart-count" style="display: none;"></span>
                             @endif
                         </a>
 
@@ -464,9 +466,11 @@
                             $totalItems = App\Helpers\CartHelper::getTotalItems();
                         @endphp
                         @if ($totalItems > 0)
-                            <span style="position: absolute; top: -8px; right: -8px; background-color: #ffffff; color: #1b6392; border-radius: 50%; padding: 2px 6px; font-size: 11px; font-weight: bold; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">
+                            <span id="mobile-cart-count" style="position: absolute; top: -8px; right: -8px; background-color: #ffffff; color: #1b6392; border-radius: 50%; padding: 2px 6px; font-size: 11px; font-weight: bold; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">
                                 {{ $totalItems }}
                             </span>
+                        @else
+                            <span id="mobile-cart-count" style="display: none;"></span>
                         @endif
                     </div>
                 </a>
