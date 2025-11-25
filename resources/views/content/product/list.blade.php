@@ -203,10 +203,9 @@ $('.daterange').val('');
 //listing data table
 $(document).ready(function() {
     //listing data table ------------------------------------------------------ Start
-    // Check for saved page before initializing
-    var savedPage = sessionStorage.getItem('product_list_page');
-    var shouldRestorePage = (savedPage !== null && savedPage !== '');
-    var pageToRestore = shouldRestorePage ? parseInt(savedPage) : 0;
+    // Track if we've restored the page (only restore once on initial load)
+    var pageRestoredFlag = false;
+    var isInitialLoad = true;
     
     var table = $('#listing_table').DataTable({
         sDom: '<"top"f>rt<"bottom table_bottom"lip><"clear">', // shift selection box in footer
@@ -224,12 +223,20 @@ $(document).ready(function() {
                 d.start_range = $('#start_range').val()
                 d.end_range = $('#end_range').val()
                 
-                // If we need to restore a page, modify the start parameter for the first request
-                if (shouldRestorePage && pageToRestore > 0 && !window.productPageRestored) {
-                    var pageLength = d.length || 20;
-                    d.start = pageToRestore * pageLength;
-                    window.productPageRestored = true;
+                // Only restore page on the very first request (initial load)
+                // Check sessionStorage directly each time to avoid caching issues
+                if (isInitialLoad && !pageRestoredFlag) {
+                    var savedPage = sessionStorage.getItem('product_list_page');
+                    if (savedPage !== null && savedPage !== '') {
+                        var pageToRestore = parseInt(savedPage);
+                        if (pageToRestore > 0) {
+                            var pageLength = d.length || 20;
+                            d.start = pageToRestore * pageLength;
+                            pageRestoredFlag = true; // Mark that we've restored the page
+                        }
+                    }
                 }
+                isInitialLoad = false; // After first request, mark as no longer initial load
             }
         },
         "aoColumns": [{
@@ -273,20 +280,22 @@ $(document).ready(function() {
     });
     
     // Update page indicator after first draw if we restored the page
-    if (shouldRestorePage && pageToRestore > 0) {
-        table.one('draw', function() {
-            var currentPage = table.page.info().page;
-            if (currentPage !== pageToRestore) {
-                // Update to the correct page - this will make one more request but it's the same page
-                table.page(pageToRestore).draw(false);
+    table.one('draw', function() {
+        // Check sessionStorage directly (don't use cached value)
+        var savedPage = sessionStorage.getItem('product_list_page');
+        if (savedPage !== null && savedPage !== '' && pageRestoredFlag) {
+            var pageToRestore = parseInt(savedPage);
+            if (pageToRestore > 0) {
+                var currentPage = table.page.info().page;
+                if (currentPage !== pageToRestore) {
+                    // Update to the correct page - this will make one more request but it's the same page
+                    table.page(pageToRestore).draw(false);
+                }
+                // Only remove sessionStorage after we've successfully restored
+                sessionStorage.removeItem('product_list_page');
             }
-            sessionStorage.removeItem('product_list_page');
-        });
-    } else if (shouldRestorePage) {
-        table.one('draw', function() {
-            sessionStorage.removeItem('product_list_page');
-        });
-    }
+        }
+    });
 
     $('#status').on('change', function() {
         table.draw();
@@ -324,6 +333,12 @@ $(document).ready(function() {
     
     // Store current page number whenever page changes
     table.on('page.dt', function() {
+        var currentPage = table.page.info().page;
+        sessionStorage.setItem('product_list_page', currentPage);
+    });
+    
+    // Also save page number when clicking edit link (most reliable - happens right before navigation)
+    $(document).on('click', 'a[href*="product/edit/"]', function(e) {
         var currentPage = table.page.info().page;
         sessionStorage.setItem('product_list_page', currentPage);
     });
