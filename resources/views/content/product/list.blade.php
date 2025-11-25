@@ -203,6 +203,11 @@ $('.daterange').val('');
 //listing data table
 $(document).ready(function() {
     //listing data table ------------------------------------------------------ Start
+    // Check for saved page before initializing
+    var savedPage = sessionStorage.getItem('product_list_page');
+    var shouldRestorePage = (savedPage !== null && savedPage !== '');
+    var pageToRestore = shouldRestorePage ? parseInt(savedPage) : 0;
+    
     var table = $('#listing_table').DataTable({
         sDom: '<"top"f>rt<"bottom table_bottom"lip><"clear">', // shift selection box in footer
         bFilter: false, //hide defalt search box
@@ -218,7 +223,13 @@ $(document).ready(function() {
                 d.stock_status = $('#stock_status').val()
                 d.start_range = $('#start_range').val()
                 d.end_range = $('#end_range').val()
-
+                
+                // If we need to restore a page, modify the start parameter for the first request
+                if (shouldRestorePage && pageToRestore > 0 && !window.productPageRestored) {
+                    var pageLength = d.length || 20;
+                    d.start = pageToRestore * pageLength;
+                    window.productPageRestored = true;
+                }
             }
         },
         "aoColumns": [{
@@ -260,6 +271,22 @@ $(document).ready(function() {
             [0, 'desc']
         ]
     });
+    
+    // Update page indicator after first draw if we restored the page
+    if (shouldRestorePage && pageToRestore > 0) {
+        table.one('draw', function() {
+            var currentPage = table.page.info().page;
+            if (currentPage !== pageToRestore) {
+                // Update to the correct page - this will make one more request but it's the same page
+                table.page(pageToRestore).draw(false);
+            }
+            sessionStorage.removeItem('product_list_page');
+        });
+    } else if (shouldRestorePage) {
+        table.one('draw', function() {
+            sessionStorage.removeItem('product_list_page');
+        });
+    }
 
     $('#status').on('change', function() {
         table.draw();
@@ -294,6 +321,13 @@ $(document).ready(function() {
         daterangepicker.startDate = moment();
         daterangepicker.endDate = moment();
     });
+    
+    // Store current page number whenever page changes
+    table.on('page.dt', function() {
+        var currentPage = table.page.info().page;
+        sessionStorage.setItem('product_list_page', currentPage);
+    });
+    
     //listing data table ------------------------------------------------------ End
 
 
