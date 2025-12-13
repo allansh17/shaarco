@@ -276,7 +276,45 @@ $(document).ready(function() {
         }, ],
         order: [
             [0, 'desc']
-        ]
+        ],
+        drawCallback: function(settings) {
+            // Add jump to page input after pagination is drawn
+            if (!$('#jump-to-page-container').length) {
+                var pageInfo = this.api().page.info();
+                var paginationHtml = '<div id="jump-to-page-container" style="display: inline-block; margin-left: 15px;">' +
+                    '<label style="margin-right: 5px; margin-bottom: 0;">Go to page:</label>' +
+                    '<input type="number" id="jump-to-page-input" min="1" max="' + pageInfo.pages + '" ' +
+                    'style="width: 60px; padding: 2px 5px; margin-right: 5px;" placeholder="Page">' +
+                    '<button type="button" id="jump-to-page-btn" class="btn btn-sm btn-primary" style="padding: 2px 10px;">Go</button>' +
+                    '</div>';
+                $(this.api().table().container()).find('.dataTables_paginate').after(paginationHtml);
+            } else {
+                // Update max value
+                var pageInfo = this.api().page.info();
+                $('#jump-to-page-input').attr('max', pageInfo.pages);
+            }
+        }
+    });
+    
+    // Handle jump to page functionality
+    $(document).on('click', '#jump-to-page-btn', function() {
+        var pageInput = $('#jump-to-page-input');
+        var targetPage = parseInt(pageInput.val()) - 1; // DataTables uses 0-based indexing
+        var pageInfo = table.page.info();
+        
+        if (!isNaN(targetPage) && targetPage >= 0 && targetPage < pageInfo.pages) {
+            table.page(targetPage).draw(false);
+            pageInput.val(''); // Clear input after jumping
+        } else {
+            alert('Please enter a valid page number between 1 and ' + pageInfo.pages);
+        }
+    });
+    
+    // Allow Enter key to trigger jump
+    $(document).on('keypress', '#jump-to-page-input', function(e) {
+        if (e.which === 13) { // Enter key
+            $('#jump-to-page-btn').click();
+        }
     });
     
     // Update page indicator after first draw if we restored the page
