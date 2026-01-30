@@ -67,27 +67,36 @@ public function searchproduct(Request $request)
     if ($query) {
         // Ensure the query is sanitized
         $query = trim($query);
+        
+        // Split query into individual words (handles Arabic and English)
+        $words = array_filter(array_map('trim', explode(' ', $query)));
+        
+        if (empty($words)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Please enter a valid search query.',
+            ]);
+        }
 
-        // Search products by name, code, category name, subcategory name, and brand name
-        $products = Product::where('name', 'like', "%{$query}%")
-                           ->orWhere('code', 'like', "%{$query}%")
-                           ->orWhereHas('category', function ($q) use ($query) {
-                               $q->where('name', 'like', "%{$query}%");
-                           })
-                           ->orWhereHas('subcategory', function ($q) use ($query) {
-                               $q->where('name', 'like', "%{$query}%");
-                           })
-                           ->orWhereHas('brands', function ($q) use ($query) {
-                               $q->where('name', 'like', "%{$query}%");
-                           })
-                           ->get();
-
-        // if ($products->isEmpty()) {
-        //     return response()->json([
-        //         'status' => false,
-        //         'message' => 'No products found matching your search query.',
-        //     ]);
-        // }
+        // Search products where ALL words appear in name, code, category, subcategory, or brand
+        $products = Product::where(function ($q) use ($words) {
+            // For each word, check if it appears in any of the searchable fields
+            foreach ($words as $word) {
+                $q->where(function ($subQuery) use ($word) {
+                    $subQuery->where('name', 'like', "%{$word}%")
+                             ->orWhere('code', 'like', "%{$word}%")
+                             ->orWhereHas('category', function ($catQuery) use ($word) {
+                                 $catQuery->where('name', 'like', "%{$word}%");
+                             })
+                             ->orWhereHas('subcategory', function ($subCatQuery) use ($word) {
+                                 $subCatQuery->where('name', 'like', "%{$word}%");
+                             })
+                             ->orWhereHas('brands', function ($brandQuery) use ($word) {
+                                 $brandQuery->where('name', 'like', "%{$word}%");
+                             });
+                });
+            }
+        })->get();
 
         // Return products as JSON response
         return response()->json([

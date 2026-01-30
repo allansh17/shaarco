@@ -223,29 +223,47 @@ class HomeController extends Controller
         ->whereNull('deleted_at');
 
     // Search Query (Name, Code, Category, Subcategory, Brand)
+    // Split query into words and require ALL words to match
     if (!empty($query)) {
-        $productsQuery->where(function ($q) use ($query) {
-            $q->where('name', 'like', "%{$query}%")
-              ->orWhere('code', 'like', "%{$query}%")
-              ->orWhereHas('category', function ($q) use ($query) {
-                  $q->where('name', 'like', "%{$query}%");
-              })
-              ->orWhereHas('subcategory', function ($q) use ($query) {
-                  $q->where('name', 'like', "%{$query}%");
-              })
-              ->orWhereHas('brands', function ($q) use ($query) {
-                  $q->where('name', 'like', "%{$query}%");
-              });
-        });
+        $words = array_filter(array_map('trim', explode(' ', $query)));
+        if (!empty($words)) {
+            $productsQuery->where(function ($q) use ($words) {
+                // For each word, check if it appears in any of the searchable fields
+                foreach ($words as $word) {
+                    $q->where(function ($subQuery) use ($word) {
+                        $subQuery->where('name', 'like', "%{$word}%")
+                                  ->orWhere('code', 'like', "%{$word}%")
+                                  ->orWhereHas('category', function ($catQuery) use ($word) {
+                                      $catQuery->where('name', 'like', "%{$word}%");
+                                  })
+                                  ->orWhereHas('subcategory', function ($subCatQuery) use ($word) {
+                                      $subCatQuery->where('name', 'like', "%{$word}%");
+                                  })
+                                  ->orWhereHas('brands', function ($brandQuery) use ($word) {
+                                      $brandQuery->where('name', 'like', "%{$word}%");
+                                  });
+                    });
+                }
+            });
+        }
     }
 
     // Second Search Query (Name, Measurements, Code)
+    // Split query1 into words and require ALL words to match
     if (!empty($query1)) {
-        $productsQuery->where(function ($q) use ($query1) {
-            $q->where('name', 'like', "%{$query1}%")
-              ->orWhere('measurements', 'like', "%{$query1}%")
-              ->orWhere('code', 'like', "%{$query1}%");
-        });
+        $words1 = array_filter(array_map('trim', explode(' ', $query1)));
+        if (!empty($words1)) {
+            $productsQuery->where(function ($q) use ($words1) {
+                // For each word, check if it appears in any of the searchable fields
+                foreach ($words1 as $word) {
+                    $q->where(function ($subQuery) use ($word) {
+                        $subQuery->where('name', 'like', "%{$word}%")
+                                  ->orWhere('measurements', 'like', "%{$word}%")
+                                  ->orWhere('code', 'like', "%{$word}%");
+                    });
+                }
+            });
+        }
     }
 
     // --- INCLUSIVE FILTER LOGIC ---
@@ -437,9 +455,17 @@ public function getproducts($id, Request $request)
         ->whereNull('products.deleted_at')
         ->groupBy('products.id');
 
-    // 🟢 **Apply Search Filter**
+    // 🟢 **Apply Search Filter** - Split query into words and require ALL words to match
     if (!empty($query)) {
-        $productsQuery->where('products.name', 'like', "%{$query}%");
+        $words = array_filter(array_map('trim', explode(' ', $query)));
+        if (!empty($words)) {
+            $productsQuery->where(function ($q) use ($words) {
+                // For each word, check if it appears in the product name
+                foreach ($words as $word) {
+                    $q->where('products.name', 'like', "%{$word}%");
+                }
+            });
+        }
     }
 
     // 🟢 **Apply Brand Filter**
