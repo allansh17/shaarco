@@ -222,46 +222,50 @@ class HomeController extends Controller
     $productsQuery = Product::with(['category', 'subcategory', 'brands'])
         ->whereNull('deleted_at');
 
-    // Search Query (Name, Code, Category, Subcategory, Brand)
-    // Split query into words and require ALL words to match
+    // Search Query - Require ALL words to appear in product name or code
     if (!empty($query)) {
         $words = array_filter(array_map('trim', explode(' ', $query)));
         if (!empty($words)) {
             $productsQuery->where(function ($q) use ($words) {
-                // For each word, check if it appears in any of the searchable fields
-                foreach ($words as $word) {
-                    $q->where(function ($subQuery) use ($word) {
-                        $subQuery->where('name', 'like', "%{$word}%")
-                                  ->orWhere('code', 'like', "%{$word}%")
-                                  ->orWhereHas('category', function ($catQuery) use ($word) {
-                                      $catQuery->where('name', 'like', "%{$word}%");
-                                  })
-                                  ->orWhereHas('subcategory', function ($subCatQuery) use ($word) {
-                                      $subCatQuery->where('name', 'like', "%{$word}%");
-                                  })
-                                  ->orWhereHas('brands', function ($brandQuery) use ($word) {
-                                      $brandQuery->where('name', 'like', "%{$word}%");
-                                  });
-                    });
-                }
+                // Require ALL words to appear in the product name
+                $q->where(function ($nameQuery) use ($words) {
+                    foreach ($words as $word) {
+                        $nameQuery->where('name', 'like', "%{$word}%");
+                    }
+                })
+                // OR all words appear in code
+                ->orWhere(function ($codeQuery) use ($words) {
+                    foreach ($words as $word) {
+                        $codeQuery->where('code', 'like', "%{$word}%");
+                    }
+                });
             });
         }
     }
 
-    // Second Search Query (Name, Measurements, Code)
-    // Split query1 into words and require ALL words to match
+    // Second Search Query - Require ALL words to appear in name, measurements, or code
     if (!empty($query1)) {
         $words1 = array_filter(array_map('trim', explode(' ', $query1)));
         if (!empty($words1)) {
             $productsQuery->where(function ($q) use ($words1) {
-                // For each word, check if it appears in any of the searchable fields
-                foreach ($words1 as $word) {
-                    $q->where(function ($subQuery) use ($word) {
-                        $subQuery->where('name', 'like', "%{$word}%")
-                                  ->orWhere('measurements', 'like', "%{$word}%")
-                                  ->orWhere('code', 'like', "%{$word}%");
-                    });
-                }
+                // Require ALL words to appear in name
+                $q->where(function ($nameQuery) use ($words1) {
+                    foreach ($words1 as $word) {
+                        $nameQuery->where('name', 'like', "%{$word}%");
+                    }
+                })
+                // OR all words appear in measurements
+                ->orWhere(function ($measureQuery) use ($words1) {
+                    foreach ($words1 as $word) {
+                        $measureQuery->where('measurements', 'like', "%{$word}%");
+                    }
+                })
+                // OR all words appear in code
+                ->orWhere(function ($codeQuery) use ($words1) {
+                    foreach ($words1 as $word) {
+                        $codeQuery->where('code', 'like', "%{$word}%");
+                    }
+                });
             });
         }
     }

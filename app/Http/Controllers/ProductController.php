@@ -78,25 +78,21 @@ public function searchproduct(Request $request)
             ]);
         }
 
-        // Search products where ALL words appear in name, code, category, subcategory, or brand
+        // Search products where ALL words appear in the product name
+        // This ensures all search words are actually in the product name itself
         $products = Product::where(function ($q) use ($words) {
-            // For each word, check if it appears in any of the searchable fields
+            // Require ALL words to appear in the product name
             foreach ($words as $word) {
-                $q->where(function ($subQuery) use ($word) {
-                    $subQuery->where('name', 'like', "%{$word}%")
-                             ->orWhere('code', 'like', "%{$word}%")
-                             ->orWhereHas('category', function ($catQuery) use ($word) {
-                                 $catQuery->where('name', 'like', "%{$word}%");
-                             })
-                             ->orWhereHas('subcategory', function ($subCatQuery) use ($word) {
-                                 $subCatQuery->where('name', 'like', "%{$word}%");
-                             })
-                             ->orWhereHas('brands', function ($brandQuery) use ($word) {
-                                 $brandQuery->where('name', 'like', "%{$word}%");
-                             });
-                });
+                $q->where('name', 'like', "%{$word}%");
             }
-        })->get();
+        })
+        // Also include products where all words appear in code
+        ->orWhere(function ($q) use ($words) {
+            foreach ($words as $word) {
+                $q->where('code', 'like', "%{$word}%");
+            }
+        })
+        ->get();
 
         // Return products as JSON response
         return response()->json([
