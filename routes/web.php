@@ -265,6 +265,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('inquiry/list', [InquiryController::class, 'index']);
     Route::post('inquiry/store', [InquiryController::class, 'store']);
     Route::post('inquiry/delete', [InquiryController::class, 'delete'])->name('delete.inquiry');
+    Route::post('inquiry/bulk-delete', [InquiryController::class, 'bulkDelete'])->name('bulk.delete.inquiry');
     Route::post('inquiry/get_address', [InquiryController::class, 'get_address'])->name('get_address.inquiry');
     Route::post('inquiry/get_product', [InquiryController::class, 'get_product'])->name('get_product.inquiry');
     Route::post('inquiry/product_detail', [InquiryController::class, 'product_detail'])->name('product_detail.inquiry');

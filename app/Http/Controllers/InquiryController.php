@@ -267,6 +267,7 @@ class InquiryController extends Controller
             // echo "<pre>";
             // print_r($data);die;
             foreach ($data as $value) {
+                $row['checkbox'] = '<input type="checkbox" class="row-checkbox" value="' . $value->id . '" data-id="' . $value->id . '">';
                 $row['id'] = $start + $i;
                
                 $row['name'] = $value->name;
@@ -652,6 +653,32 @@ $row['created_at'] = Carbon::parse($value->created_at)->format('Y-m-d'); // Form
             report($e);
             return response()->json(['error' => 'Something went wrong']);
             // return "Something went wrong";
+        }
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        try {
+            $ids = $request->input('ids', []);
+            
+            if (empty($ids) || !is_array($ids)) {
+                return response()->json(['error' => 'No items selected'], 400);
+            }
+
+            // Delete multiple Contact inquiries
+            $deleted = Contact::whereIn('id', $ids)->delete();
+            
+            if ($deleted > 0) {
+                return response()->json([
+                    'success' => $deleted . ' inquiry(ies) deleted successfully',
+                    'deleted_count' => $deleted
+                ], 200);
+            } else {
+                return response()->json(['error' => 'No inquiries were deleted'], 400);
+            }
+        } catch (Throwable $e) {
+            report($e);
+            return response()->json(['error' => 'Something went wrong: ' . $e->getMessage()], 500);
         }
     }
 

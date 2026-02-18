@@ -113,7 +113,9 @@ $urlComponents = explode('/', $currentURL);
                         <button type="button" class="btn btn-primary btn-rounded-20 me-2" id="reset_data">
                             <i class="bx bx-reset"></i>
                         </button>
-
+                        <button type="button" class="btn btn-danger btn-rounded-20 me-2" id="bulk_delete_btn" style="display: none;">
+                            <i class="bx bx-trash"></i> Delete Selected
+                        </button>
                         <!-- <a class="btn btn-primary btn-rounded-20" href="{{ url('/inquiry/create') }}">
                         <i class="bx bx-plus me-0 me-sm-2"></i> Add
                     </a> -->
@@ -124,6 +126,7 @@ $urlComponents = explode('/', $currentURL);
                     <table id="listing_table" class="table">
                         <thead>
                             <tr>
+                                <th><input type="checkbox" id="select_all" title="Select All"></th>
                                 <th>{{ __('##')}}</th>
                                 <th>{{ __('Name')}}</th>
                                 <th>{{ __('email')}}</th>
@@ -251,6 +254,11 @@ if (in_array("offline_orders", $urlComponents)) {
                 }
             },
             "aoColumns": [{
+                    mData: 'checkbox',
+                    orderable: false,
+                    searchable: false
+                },
+                {
                     mData: 'id'
                 },
                 // {
@@ -286,7 +294,7 @@ if (in_array("offline_orders", $urlComponents)) {
             //add attribute on column using id or attribute 
             "aoColumnDefs": [{
                 "bSortable": false,
-                'aTargets': [0, 2, 3, 4]
+                'aTargets': [0, 1, 3, 4, 5]
             }, ],
             order: [
                 [0, 'desc']
@@ -388,6 +396,125 @@ if (in_array("offline_orders", $urlComponents)) {
         });
         //listing data table ------------------------------------------------------ End
 
+        // Multi-select functionality
+        var selectedIds = [];
+
+        // Select All checkbox
+        $(document).on('change', '#select_all', function() {
+            var isChecked = $(this).is(':checked');
+            $('.row-checkbox').prop('checked', isChecked);
+            
+            if (isChecked) {
+                // Get all IDs from current page
+                $('.row-checkbox').each(function() {
+                    var id = $(this).val();
+                    if (selectedIds.indexOf(id) === -1) {
+                        selectedIds.push(id);
+                    }
+                });
+            } else {
+                // Remove all IDs from current page
+                $('.row-checkbox').each(function() {
+                    var id = $(this).val();
+                    var index = selectedIds.indexOf(id);
+                    if (index > -1) {
+                        selectedIds.splice(index, 1);
+                    }
+                });
+            }
+            
+            updateBulkDeleteButton();
+        });
+
+        // Individual checkbox change
+        $(document).on('change', '.row-checkbox', function() {
+            var id = $(this).val();
+            var isChecked = $(this).is(':checked');
+            
+            if (isChecked) {
+                if (selectedIds.indexOf(id) === -1) {
+                    selectedIds.push(id);
+                }
+            } else {
+                var index = selectedIds.indexOf(id);
+                if (index > -1) {
+                    selectedIds.splice(index, 1);
+                }
+                // Uncheck select all if individual checkbox is unchecked
+                $('#select_all').prop('checked', false);
+            }
+            
+            updateBulkDeleteButton();
+        });
+
+        // Update bulk delete button visibility
+        function updateBulkDeleteButton() {
+            if (selectedIds.length > 0) {
+                $('#bulk_delete_btn').show().text('Delete Selected (' + selectedIds.length + ')');
+            } else {
+                $('#bulk_delete_btn').hide();
+            }
+        }
+
+        // Bulk delete button click
+        $('#bulk_delete_btn').on('click', function() {
+            if (selectedIds.length === 0) {
+                toastr.warning('Please select at least one inquiry to delete');
+                return;
+            }
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'You will delete ' + selectedIds.length + ' inquiry(ies)!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete them!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    bulkDeleteInquiries(selectedIds);
+                }
+            });
+        });
+
+        // Bulk delete function
+        function bulkDeleteInquiries(ids) {
+            $.ajax({
+                type: "POST",
+                url: "{{route('bulk.delete.inquiry')}}",
+                data: {
+                    ids: ids,
+                    _token: '{{csrf_token()}}'
+                },
+                success: function(data) {
+                    if (data.success) {
+                        toastr.success(data.success);
+                        selectedIds = [];
+                        $('#select_all').prop('checked', false);
+                        updateBulkDeleteButton();
+                        $('#listing_table').DataTable().ajax.reload();
+                    } else {
+                        toastr.error(data.error || 'Something went wrong');
+                    }
+                },
+                error: function(xhr) {
+                    var errorMsg = 'Something went wrong';
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        errorMsg = xhr.responseJSON.error;
+                    }
+                    toastr.error(errorMsg);
+                }
+            });
+        }
+
+        // Clear selections when table is redrawn
+        $('#listing_table').on('draw.dt', function() {
+            $('#select_all').prop('checked', false);
+            // Note: We keep selectedIds array to maintain selections across pages
+            // If you want to clear on page change, uncomment below:
+            // selectedIds = [];
+            // updateBulkDeleteButton();
+        });
 
     });
 
