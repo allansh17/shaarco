@@ -202,16 +202,21 @@ class FrontendController extends Controller
 
     public function add_cartpage()
     {
-        $cart = json_decode(Cookie::get('cart', '[]'), true);
-
         $totalSubTotal = 0;
         // $shippingCost = 0;
         // $tax = 0;
         $totalItems = 0;
+        $cart = [];
 
-        foreach ($cart as $item) {
-            $totalSubTotal += $item['price'];
-            $totalItems += $item['quantity'];
+        // Only process cart if user is authenticated
+        // Guests shouldn't have items in cart
+        if (Auth::guard('local')->check()) {
+            $cart = json_decode(Cookie::get('cart', '[]'), true);
+
+            foreach ($cart as $item) {
+                $totalSubTotal += $item['price'];
+                $totalItems += $item['quantity'];
+            }
         }
 
         // $tax = $totalSubTotal * 0.05;

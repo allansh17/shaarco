@@ -27,10 +27,15 @@
                 <div class="cart_list">
                     <h3>بطاقة التسوق</h3>
                     @php
-                        $cart = json_decode(Cookie::get('cart', '[]'), true);
+                        // Only get cart from cookie if user is authenticated
+                        // Guests shouldn't have items in cart
+                        $cart = [];
+                        if (Auth::guard('local')->check()) {
+                            $cart = json_decode(Cookie::get('cart', '[]'), true);
+                        }
                     @endphp
 
-                    @if (!empty($cart))
+                    @if (!empty($cart) && Auth::guard('local')->check())
                                 <table>
                                     <thead>
                                         <tr>
@@ -107,7 +112,12 @@
                                     </tbody>
                                 </table>
                     @else
-                        <p>Your cart is empty.</p>
+                        @if (!Auth::guard('local')->check())
+                            <p>يرجى تسجيل الدخول لعرض سلة التسوق الخاصة بك.</p>
+                            <p><small>Please login to view your cart.</small></p>
+                        @else
+                            <p>Your cart is empty.</p>
+                        @endif
                     @endif
                     @if(Auth::guard('local')->check())
                         <div class="cunt_shoping">
