@@ -82,7 +82,7 @@ Route::post('/enquire_now', [HomeController::class, 'enquiresubmit'])->name('enq
 Route::get('/about-us', [HomeController::class, 'aboutus'])->name('about-us');
 Route::get('/contact_us', [HomeController::class, 'contactus'])->name('contact_us');
 
-Route::post('/submit-contact', [ContactController::class, 'submitContact'])->name('contactsubmit');
+Route::post('/submit-contact', [ContactController::class, 'submitContact'])->middleware('throttle:3,60')->name('contactsubmit');
 // routes/web.php
 Route::get('/searchproduct', [ProductController::class, 'searchproduct'])->name('searchproduct');
 

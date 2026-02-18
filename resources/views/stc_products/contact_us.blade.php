@@ -42,8 +42,17 @@
                                     {{ session('success') }}
                                 </div>
                             @endif
+                            @if (session('error'))
+                                <div class="alert alert-danger">
+                                    {{ session('error') }}
+                                </div>
+                            @endif
                             <form method="POST" action="{{ route('contactsubmit') }}">
                                 @csrf
+                                <!-- Honeypot field - hidden from users, bots will fill it -->
+                                <div style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;">
+                                    <input type="text" name="website" tabindex="-1" autocomplete="off">
+                                </div>
                                 <div class="row">
                                     <div class="col-6">
                                         <div class="form-group">
