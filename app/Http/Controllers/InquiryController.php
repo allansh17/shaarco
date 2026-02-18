@@ -307,13 +307,13 @@ $row['created_at'] = Carbon::parse($value->created_at)->format('Y-m-d'); // Form
                 // }
                 // $delete = '';
 
-                // $delete = '<a href="javascript:void(0)" data-bs-toggle="tooltip" title="Delete" onclick="deleteItem(' . $value->id . ')"><i class="bx bx-trash  f-16 text-red mr-1"></i></a>';
+                $delete = '<a href="javascript:void(0)" data-bs-toggle="tooltip" title="Delete" onclick="deleteItem(' . $value->id . ')"><i class="bx bx-trash  f-16 text-red mr-1"></i></a>';
 
 
 
 
 
-                $row['actions'] = '<div class="table-actions">' . $view . '</div>';
+                $row['actions'] = '<div class="table-actions">' . $view . ' ' . $delete . '</div>';
 
                 $datas[] = $row;
                 $i++;
@@ -625,13 +625,28 @@ $row['created_at'] = Carbon::parse($value->created_at)->format('Y-m-d'); // Form
     {
         $id = $request->id;
         try {
-            $product = Order::findOrFail($id);
-            $status =  $product->delete();
-
-            if ($status === true) {
-                return response()->json(['success' => 'Order deleted successfully', "status" => $status], 200);
+            // Check if it's a Contact inquiry (from contact table)
+            $contact = Contact::find($id);
+            
+            if ($contact) {
+                // Delete Contact inquiry
+                $status = $contact->delete();
+                
+                if ($status === true) {
+                    return response()->json(['success' => 'Inquiry deleted successfully', "status" => $status], 200);
+                } else {
+                    return response()->json(['error' => 'Something went wrong', "status" => $status], 201);
+                }
             } else {
-                return response()->json(['error' => 'Something went wrong', "status" => $status], 201);
+                // Fallback to Order deletion for backward compatibility
+                $product = Order::findOrFail($id);
+                $status = $product->delete();
+
+                if ($status === true) {
+                    return response()->json(['success' => 'Order deleted successfully', "status" => $status], 200);
+                } else {
+                    return response()->json(['error' => 'Something went wrong', "status" => $status], 201);
+                }
             }
         } catch (Throwable $e) {
             report($e);
