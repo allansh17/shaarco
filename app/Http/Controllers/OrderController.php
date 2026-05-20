@@ -566,17 +566,27 @@ class OrderController extends Controller
     {
         try {
             $id = base64_decode($id);
-            $Id = Checkout::select('user_id')->findorfail($id);
-            $customer_id = $Id->customer_id;
             $data = array();
             $data['order'] = $orders =  Checkout::select('checkouts.*', 'customers.first_name', 'customers.last_name', 'customers.image as profileImage', 'customers.email', 'customers.phone', 'customers.user_type')->join('customers', 'customers.id', 'checkouts.user_id')->findOrFail($id);
             $data['product_order'] = $p_orders = ProductOrder::select('product_orders.*', 'products.*', 'category.name as category_name','brands.name as brand_name')->join('products', 'products.id', 'product_orders.product_id')->leftJoin('category', 'category.id', 'products.category_id')->leftJoin('brands', 'brands.id', '=', 'products.brands') ->where('checkout_id', $id)->get();
+
+            $userType = $orders->user_type ?? 'normal';
+            $orderSubtotal = 0;
+            $orderItemCount = 0;
+            foreach ($p_orders as $p_order) {
+                $unitPrice = $this->resolveInquiryUnitPrice($p_order, $userType);
+                $p_order->unit_price = $unitPrice;
+                $p_order->line_total = $unitPrice * (int) $p_order->qty;
+                $orderSubtotal += $p_order->line_total;
+                $orderItemCount += (int) $p_order->qty;
+            }
+            $data['order_subtotal'] = $orderSubtotal;
+            $data['order_item_count'] = $orderItemCount;
+
             $data['shipping_address'] = CustomerAddress::select('*')->where('id', $orders->customer_address_id)->first();
             $data['billing_address'] = CustomerAddress::select('*')->where('id', $orders->customer_billingaddress_id)->first();
-            $data['total_order'] = Checkout::where('user_id', $customer_id)->count();
+            $data['total_order'] = Checkout::where('user_id', $orders->user_id)->count();
 
-            // dd($data);
-            //    return print_r($data['total_order']);die;
             return view('content/order/product_view')->with($data);
         } catch (\Exception $e) {
             $res = array('code' => 201, 'msg' => 'Something went wrong! Try again' . $e);
@@ -902,5 +912,17 @@ class OrderController extends Controller
         }
 
         return json_encode($resdata);
+    }
+
+    protected function resolveInquiryUnitPrice($productRow, string $userType): float
+    {
+        if ($userType === 'loyal') {
+            return (float) ($productRow->loyal_price ?? 0);
+        }
+        if ($userType === 'wholesaler') {
+            return (float) ($productRow->wholesaler_price ?? 0);
+        }
+
+        return (float) ($productRow->normal_price ?? 0);
     }
 }

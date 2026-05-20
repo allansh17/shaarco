@@ -97,7 +97,15 @@
                                                 </div>
                                                 <div class="col-md-4">
                                                     <h6 class="mb-0"><span>Quantity: </span></h6>
-                                                    <p class="mb-0">{{$p_order->qty}}</p>
+                                                    <p class="mb-0">{{ $p_order->qty }}</p>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <h6 class="mb-0"><span>Unit Price: </span></h6>
+                                                    <p class="mb-0">₪ {{ number_format($p_order->unit_price ?? 0, 2) }}</p>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <h6 class="mb-0"><span>Line Total: </span></h6>
+                                                    <p class="mb-0"><strong>₪ {{ number_format($p_order->line_total ?? 0, 2) }}</strong></p>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <h6 class="mb-0"><span>Brand Name: </span></h6>
@@ -183,43 +191,33 @@
                     <hr class="mb-4 opacity-100 ">
 
                     <h5>Order Message</h5>
-                    <div class="mrp d-flex justify-content-between">
-                        <!-- <p class="mb-0">MRP</p> -->
-                        <span>{{ $order->message }}</span>
+                    <div class="mrp d-flex justify-content-between mb-3">
+                        <span>{{ $order->message ?: '—' }}</span>
                     </div>
-                    <!-- <div class="dom d-flex justify-content-between">
-                            <p class="mb-0">Discount (Coupon)</p>
-                            <span>₹{{ $order->discount }}</span>
+
+                    <hr class="opacity-100">
+
+                    <h5 class="mb-3">Order Summary</h5>
+                    <div class="sc d-flex justify-content-between">
+                        <p class="mb-0">Items (qty)</p>
+                        <span>{{ $order_item_count ?? 0 }}</span>
+                    </div>
+                    <div class="mrp d-flex justify-content-between">
+                        <p class="mb-0">Subtotal</p>
+                        <span>₪ {{ number_format($order_subtotal ?? 0, 2) }}</span>
+                    </div>
+                    <div class="sc d-flex justify-content-between">
+                        <p class="mb-0">Shipping</p>
+                        <span>Free</span>
+                    </div>
+                    <hr class="opacity-100">
+                    <div class="tota d-flex align-items-start justify-content-between">
+                        <div>
+                            <h6 class="mb-0">Total</h6>
+                            <p class="mb-0 text-muted" style="font-size: 13px;">Based on customer price type ({{ $order->user_type ?? 'normal' }})</p>
                         </div>
-                        <div class="sc d-flex justify-content-between">
-                            <p class="mb-0">Shipping Charges</p>
-                            <span>
-                                {{ $order->shipping_charges == 0 ? 'Free' : $order->shipping_charges }}
-                            </span>
-                        </div> -->
-                    <!-- <div class="dcd d-flex justify-content-between">
-                                    <p class="mb-0">Discount <span>(Coupon - DEMO254)</span></p>
-                                    <span>₹{{ $order->discount }}</span>
-                                </div> -->
-
-                    <!-- <hr class=" opacity-100 solid"> -->
-                    <!-- <div class="cgst d-flex justify-content-between">
-                                    <p class="mb-0">CGST </p>
-                                    <span>₹{{ isset($order->cgst) ? $order->cgst : '0.00' }}</span>
-                                </div>
-                                <div class="gst d-flex justify-content-between">
-                                    <p class="mb-0">SGST </p>
-                                    <span>₹{{ isset($order->sgst) ? $order->sgst : '0.00' }}</span>
-                                </div>
-                                <hr class=" opacity-100 solid"> -->
-
-                    <!-- <div class="tota d-flex align-items-start justify-content-between">
-                            <div class="">
-                                <h6>Total</h6>
-                                <p class="mb-0">* Inclusive of all Taxes</p>
-                            </div>
-                            <h6>₹{{$order->total_amount}}</h6>
-                        </div> -->
+                        <h6 class="mb-0">₪ {{ number_format($order_subtotal ?? 0, 2) }}</h6>
+                    </div>
                 </div>
 
                 {{-- <div class="user-time" style="display:none;">
