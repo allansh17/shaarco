@@ -92,7 +92,10 @@ header {
 .cart {
     padding: 0;
     display: flex;
-    justify-content: space-around;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
 }
 
 .Cart-part .cart img {
@@ -1805,14 +1808,16 @@ button.btn.btn-mobal svg {
     overflow: hidden;
 }
 .login_user_name {
-    font-size: 18px;
+    font-size: 16px;
     text-transform: capitalize;
     display: inline-block;
-    width: 60px;
-    height: 1.5em;
+    max-width: min(220px, 24vw);
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    vertical-align: middle;
+    line-height: 1.4;
 }
 .login_user_name i.fa-solid.fa-caret-right.fa-rotate-by { 
     display: none;

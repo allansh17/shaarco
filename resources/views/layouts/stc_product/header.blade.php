@@ -35,11 +35,17 @@
     <style>
         .cart {
             position: relative;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-shrink: 0;
         }
 
         .user_login {
             position: relative;
             display: inline-block;
+            max-width: min(240px, 26vw);
+            min-width: 0;
         }
 
         .dropdown_menu {
@@ -247,6 +253,10 @@
             font-size: 14px;
             cursor: pointer;
             padding: 8px 12px;
+            max-width: min(160px, 42vw);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
             background-color: rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             transition: all 0.3s ease;
@@ -356,7 +366,7 @@
 
                         @if(Auth::guard('local')->check())
                             <div class="user_login">
-                                <div class="login_user_name">
+                                <div class="login_user_name" title="{{ Auth::guard('local')->user()->first_name }}">
 
                                     <i class="fa-solid fa-caret-right fa-rotate-by"
                                         style="--fa-rotate-angle: 90deg;"></i>&nbsp;&nbsp;{{ Auth::guard('local')->user()->first_name }}
@@ -481,7 +491,7 @@
                 <!-- Mobile User Section -->
                 @if(Auth::guard('local')->check())
                     <div class="mobile-user-dropdown">
-                        <div class="mobile-user-name" onclick="toggleMobileUserMenu()">
+                        <div class="mobile-user-name" onclick="toggleMobileUserMenu()" title="{{ Auth::guard('local')->user()->first_name }}">
                             <i class="fas fa-user"></i>
                             {{ Auth::guard('local')->user()->first_name }}
                             <i class="fas fa-chevron-down" style="margin-left: 5px; font-size: 12px;"></i>
