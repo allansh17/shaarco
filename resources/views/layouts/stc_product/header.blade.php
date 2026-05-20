@@ -28,7 +28,7 @@
     <!-- Toastr CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
     <!-- custome-css -->
-    <link rel="stylesheet" href="{{ asset('stc_css/style.css') }}" />
+    <link rel="stylesheet" href="{{ asset('stc_css/style.css') }}?v=20260521" />
 
     <title>@yield('title', 'Home-page')</title>
     @stack('head')
@@ -44,8 +44,23 @@
         .user_login {
             position: relative;
             display: inline-block;
-            max-width: min(240px, 26vw);
+            max-width: min(280px, 32vw);
             min-width: 0;
+            flex-shrink: 1;
+        }
+
+        .login_user_name {
+            font-size: 16px;
+            text-transform: capitalize;
+            display: inline-block;
+            max-width: min(280px, 32vw);
+            width: auto !important;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            vertical-align: middle;
+            line-height: 1.4;
         }
 
         .dropdown_menu {
@@ -253,7 +268,7 @@
             font-size: 14px;
             cursor: pointer;
             padding: 8px 12px;
-            max-width: min(160px, 42vw);
+            max-width: min(200px, 50vw);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;

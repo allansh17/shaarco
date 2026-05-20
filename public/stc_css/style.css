@@ -1811,7 +1811,8 @@ button.btn.btn-mobal svg {
     font-size: 16px;
     text-transform: capitalize;
     display: inline-block;
-    max-width: min(220px, 24vw);
+    max-width: min(280px, 32vw);
+    width: auto;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
