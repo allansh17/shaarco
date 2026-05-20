@@ -221,7 +221,7 @@
                                 </div>
                                 <div class="cont_info_text">
                                     <h3>بريد إلكتروني</h3>
-                                    <div class="mail"><a href="magic-washer11@hotmail.com">magic-washer11@hotmail.com</a></div>
+                                    <div class="mail"><a href="mailto:stc@shaar.ps">stc@shaar.ps</a></div>
                                     <h3>المزيد من معلومات الاستفسار</h3>
                                     <div>
                                         <p style="display: flex; align-items: baseline;"><a href="mailto:allansh17@hotmail.com">allansh17@hotmail.com</a>&nbsp;&nbsp;- مبيعات التجزئة </p>
