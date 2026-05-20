@@ -245,6 +245,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('order/list', [OrderController::class, 'index']);
     Route::post('order/store', [OrderController::class, 'store']);
     Route::post('order/delete', [OrderController::class, 'delete'])->name('delete.order');
+    Route::post('order/bulk-delete', [OrderController::class, 'bulkDelete'])->name('bulk.delete.order');
     Route::post('order/get_address', [OrderController::class, 'get_address'])->name('get_address.order');
     Route::post('order/get_product', [OrderController::class, 'get_product'])->name('get_product.order');
     Route::post('order/product_detail', [OrderController::class, 'product_detail'])->name('product_detail.order');

@@ -216,6 +216,7 @@ class OrderController extends Controller
             // echo "<pre>";
             // print_r($data);die;
             foreach ($data as $value) {
+                $row['checkbox'] = '<input type="checkbox" class="row-checkbox" value="' . $value->id . '" data-id="' . $value->id . '">';
                 $row['id'] = $start + $i;
                 $row['order_id'] = $value->id;
                 $row['name'] = $value->customer_name;
@@ -288,13 +289,13 @@ class OrderController extends Controller
                 // }
                 // $delete = '';
 
-                // $delete = '<a href="javascript:void(0)" data-bs-toggle="tooltip" title="Delete" onclick="deleteItem(' . $value->id . ')"><i class="bx bx-trash  f-16 text-red mr-1"></i></a>';
+                $delete = '<a href="javascript:void(0)" data-bs-toggle="tooltip" title="Delete" onclick="deleteItem(' . $value->id . ')"><i class="bx bx-trash  f-16 text-red mr-1"></i></a>';
 
 
 
 
 
-                $row['actions'] = '<div class="table-actions">' . $view . '</div>';
+                $row['actions'] = '<div class="table-actions">' . $view . ' ' . $delete . '</div>';
 
                 $datas[] = $row;
                 $i++;
@@ -587,18 +588,56 @@ class OrderController extends Controller
     {
         $id = $request->id;
         try {
-            $product = Order::findOrFail($id);
-            $status =  $product->delete();
+            // Order Management displays Checkout records (checkouts table)
+            $checkout = Checkout::find($id);
+            
+            if ($checkout) {
+                // Delete related product_orders first
+                ProductOrder::where('checkout_id', $id)->delete();
+                $status = $checkout->delete();
 
-            if ($status === true) {
-                return response()->json(['success' => 'Order deleted successfully', "status" => $status], 200);
+                if ($status === true) {
+                    return response()->json(['success' => 'Order deleted successfully', "status" => $status], 200);
+                } else {
+                    return response()->json(['error' => 'Something went wrong', "status" => $status], 201);
+                }
             } else {
-                return response()->json(['error' => 'Something went wrong', "status" => $status], 201);
+                return response()->json(['error' => 'Order not found'], 404);
             }
         } catch (Throwable $e) {
             report($e);
             return response()->json(['error' => 'Something went wrong']);
             // return "Something went wrong";
+        }
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        try {
+            $ids = $request->input('ids', []);
+            
+            if (empty($ids) || !is_array($ids)) {
+                return response()->json(['error' => 'No items selected'], 400);
+            }
+
+            // Order Management displays Checkout records (checkouts table), not Order (orders table)
+            // Delete related product_orders first (they reference checkout_id)
+            ProductOrder::whereIn('checkout_id', $ids)->delete();
+            
+            // Delete multiple Checkouts
+            $deleted = Checkout::whereIn('id', $ids)->delete();
+            
+            if ($deleted > 0) {
+                return response()->json([
+                    'success' => $deleted . ' order(s) deleted successfully',
+                    'deleted_count' => $deleted
+                ], 200);
+            } else {
+                return response()->json(['error' => 'No orders were deleted'], 400);
+            }
+        } catch (Throwable $e) {
+            report($e);
+            return response()->json(['error' => 'Something went wrong: ' . $e->getMessage()], 500);
         }
     }
 

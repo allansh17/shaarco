@@ -30,7 +30,8 @@
     <!-- custome-css -->
     <link rel="stylesheet" href="{{ asset('stc_css/style.css') }}" />
 
-    <title>Home-page</title>
+    <title>@yield('title', 'Home-page')</title>
+    @stack('head')
     <style>
         .cart {
             position: relative;

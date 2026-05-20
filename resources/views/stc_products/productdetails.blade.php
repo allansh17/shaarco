@@ -1,4 +1,37 @@
 @extends('layouts.stc_product.header')
+@section('title', $productdetails->name . ' - شعاركو')
+
+@push('head')
+{{-- Open Graph (Facebook, LinkedIn, etc.) --}}
+<meta property="og:type" content="product">
+<meta property="og:url" content="{{ url()->current() }}">
+<meta property="og:title" content="{{ $productdetails->name }}">
+<meta property="og:description" content="{{ Str::limit(strip_tags($productdetails->overview ?? $productdetails->full_description ?? $productdetails->name), 200) }}">
+@php
+    if ($productdetails->product_image) {
+        $ogImage = asset('uploads/product/product_image/' . $productdetails->product_image);
+    } elseif ($productImages->isNotEmpty()) {
+        $firstImage = $productImages->firstWhere(fn($i) => $i->list_image && !str_ends_with(strtolower($i->list_image ?? ''), '.mp4'));
+        $ogImage = $firstImage ? asset('uploads/product/listing_images/' . $firstImage->list_image) : asset('stc_css/images/Logo.svg');
+    } else {
+        $ogImage = asset('stc_css/images/Logo.svg');
+    }
+    // Facebook requires absolute URLs for og:image
+    $ogImageAbsolute = str_starts_with($ogImage, 'http') ? $ogImage : url($ogImage);
+@endphp
+<meta property="og:image" content="{{ $ogImageAbsolute }}">
+<meta property="og:image:secure_url" content="{{ $ogImageAbsolute }}">
+<meta property="og:site_name" content="شعاركو للمعدات الصناعية">
+<meta property="product:price:amount" content="{{ $productdetails->normal_price ?? $productdetails->loyal_price ?? '' }}">
+<meta property="product:price:currency" content="ILS">
+
+{{-- Twitter Card --}}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ $productdetails->name }}">
+<meta name="twitter:description" content="{{ Str::limit(strip_tags($productdetails->overview ?? $productdetails->full_description ?? $productdetails->name), 200) }}">
+<meta name="twitter:image" content="{{ $ogImageAbsolute }}">
+@endpush
+
 @section('content')
 <style>
     .warrent {
