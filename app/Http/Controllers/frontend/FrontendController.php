@@ -213,6 +213,7 @@ class FrontendController extends Controller
                 $cart[] = [
                     'product_id' => $item->product_id,
                     'name' => $product->name ?? '',
+                    'product_image' => $product->product_image ?? '',
                     'price' => (float) $item->total_price,
                     'quantity' => (int) $item->qty,
                     'price_per_unit' => (float) $item->price,

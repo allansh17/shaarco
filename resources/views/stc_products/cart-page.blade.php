@@ -1,4 +1,47 @@
 @extends('layouts.stc_product.header')
+
+@push('head')
+<style>
+    .cart-items-scroll {
+        max-height: min(420px, 55vh);
+        overflow-y: auto;
+        overflow-x: auto;
+        border: 1px solid #E4E7E9;
+        border-radius: 0 0 6px 6px;
+        -webkit-overflow-scrolling: touch;
+    }
+    .cart-items-scroll .cart-table {
+        margin-bottom: 0;
+    }
+    .cart-items-scroll thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #F2F4F5;
+        box-shadow: 0 1px 0 #E4E7E9;
+    }
+    .cart-product-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 160px;
+    }
+    .cart-product-thumb {
+        width: 52px;
+        height: 52px;
+        object-fit: contain;
+        flex-shrink: 0;
+        border: 1px solid #E4E7E9;
+        border-radius: 4px;
+        background: #fff;
+    }
+    .cart-product-name {
+        line-height: 1.35;
+        word-break: break-word;
+    }
+</style>
+@endpush
+
 @section('content')
 
 <div class="breadcrumb_card">
@@ -28,7 +71,8 @@
                     <h3>بطاقة التسوق</h3>
                     {{-- Cart list from database for logged-in customers (no cookie size limit) --}}
                     @if (!empty($cart) && Auth::guard('local')->check())
-                                <table>
+                                <div class="cart-items-scroll">
+                                <table class="cart-table">
                                     <thead>
                                         <tr>
                                             <th>منتجات</th>
@@ -97,12 +141,26 @@
                                                                     </div>
                                                                 </td>
 
-                                                                <td>{{ $item['name'] }}</td>
+                                                                <td>
+                                                                    <div class="cart-product-cell">
+                                                                        @if(!empty($item['product_image']))
+                                                                            <img src="{{ asset('uploads/product/product_image/' . $item['product_image']) }}"
+                                                                                alt="{{ $item['name'] }}"
+                                                                                class="cart-product-thumb">
+                                                                        @else
+                                                                            <img src="{{ asset('stc_css/images/Logo.svg') }}"
+                                                                                alt=""
+                                                                                class="cart-product-thumb">
+                                                                        @endif
+                                                                        <span class="cart-product-name">{{ $item['name'] }}</span>
+                                                                    </div>
+                                                                </td>
                                                             </tr>
                                         @endforeach
 
                                     </tbody>
                                 </table>
+                                </div>
                     @else
                         @if (!Auth::guard('local')->check())
                             <p>يرجى تسجيل الدخول لعرض سلة التسوق الخاصة بك.</p>
