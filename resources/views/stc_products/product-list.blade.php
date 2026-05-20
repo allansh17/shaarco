@@ -757,33 +757,20 @@
                 input.closest(".input-add").find(".btn-number[data-type='plus']").prop("disabled", input.val() >= max);
             });
 
-            // Function to update cart count
-            function updateCartCount(quantityToAdd) {
-                quantityToAdd = parseInt(quantityToAdd) || 1;
-                
-                // Update desktop cart count
-                let $desktopCount = $('#desktop-cart-count');
-                let currentDesktopCount = parseInt($desktopCount.text()) || 0;
-                let newDesktopCount = currentDesktopCount + quantityToAdd;
-                
-                if (newDesktopCount > 0) {
-                    $desktopCount.text(newDesktopCount);
-                    $desktopCount.show();
-                } else {
-                    $desktopCount.hide();
-                }
-                
-                // Update mobile cart count
-                let $mobileCount = $('#mobile-cart-count');
-                let currentMobileCount = parseInt($mobileCount.text()) || 0;
-                let newMobileCount = currentMobileCount + quantityToAdd;
-                
-                if (newMobileCount > 0) {
-                    $mobileCount.text(newMobileCount);
-                    $mobileCount.show();
-                } else {
-                    $mobileCount.hide();
-                }
+            function refreshCartCountBadge() {
+                $.get('{{ route('get.cart.count') }}', function (data) {
+                    let count = parseInt(data.count, 10) || 0;
+                    let $desktopCount = $('#desktop-cart-count');
+                    let $mobileCount = $('#mobile-cart-count');
+
+                    if (count > 0) {
+                        $desktopCount.text(count).show();
+                        $mobileCount.text(count).show();
+                    } else {
+                        $desktopCount.hide();
+                        $mobileCount.hide();
+                    }
+                });
             }
 
             // Handle form submission
@@ -809,8 +796,7 @@
                             progressBar: false
                         });
                         
-                        // Update cart count
-                        updateCartCount(quantity);
+                        refreshCartCountBadge();
                     },
                     error: function(xhr) {
                         toastr.error('Error adding product to cart. Please try again.', '', {

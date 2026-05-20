@@ -566,6 +566,7 @@ Route::get('remove_tocart', [FrontendController::class, 'remove_tocart'])->name(
 Route::get('cart-page', [FrontendController::class, 'add_cartpage'])->name('cart-page');
 // routes/
 Route::get('/get-cart-data', [FrontendController::class, 'getCartData'])->name('get.cart.data');
+Route::get('/get-cart-count', [FrontendController::class, 'getCartCount'])->name('get.cart.count');
 Route::post('/save-inquiry', [FrontendController::class, 'saveInquiry'])->name('save.inquiry');
 Route::post('/update-quantity', [FrontendController::class, 'updateQuantity']);
 

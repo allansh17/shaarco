@@ -26,15 +26,7 @@
             <div class="col-md-8">
                 <div class="cart_list">
                     <h3>بطاقة التسوق</h3>
-                    @php
-                        // Only get cart from cookie if user is authenticated
-                        // Guests shouldn't have items in cart
-                        $cart = [];
-                        if (Auth::guard('local')->check()) {
-                            $cart = json_decode(Cookie::get('cart', '[]'), true);
-                        }
-                    @endphp
-
+                    {{-- Cart list from database for logged-in customers (no cookie size limit) --}}
                     @if (!empty($cart) && Auth::guard('local')->check())
                                 <table>
                                     <thead>

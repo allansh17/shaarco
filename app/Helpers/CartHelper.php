@@ -1,16 +1,29 @@
 <?php
 
 namespace App\Helpers;
-use Illuminate\Support\Facades\Cookie; 
+
+use App\Models\Cart;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
+
 class CartHelper
 {
     public static function getTotalItems()
     {
-        $cart = json_decode(Cookie::get('cart', '[]'), true);
-        $totalItems = 0;
+        if (Auth::guard('local')->check()) {
+            $userId = Auth::guard('local')->id();
 
+            return (int) Cart::where('user_id', $userId)->sum('qty');
+        }
+
+        $cart = json_decode(Cookie::get('cart', '[]'), true);
+        if (!is_array($cart)) {
+            return 0;
+        }
+
+        $totalItems = 0;
         foreach ($cart as $item) {
-            $totalItems += $item['quantity'];  // Add the quantity of each item to the total count
+            $totalItems += (int) ($item['quantity'] ?? 0);
         }
 
         return $totalItems;

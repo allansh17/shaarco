@@ -92,84 +92,65 @@ class FrontendController extends Controller
     // }
 
     public function add_tocart(Request $request, $productId)
-{
-    $product = Product::find($productId);
+    {
+        $product = Product::find($productId);
 
-    // Check if the product is out of stock
-    if (!$product || $product->stock_status == 0) {
-        return redirect()->back()->with('error', 'This product is out of stock and cannot be added to the cart.');
-    }
-
-    // Get the current cart from the cookie
-    $cart = json_decode(Cookie::get('cart', '[]'), true);
-
-    // Check if the product already exists in the cart
-    $found = false;
-    foreach ($cart as &$item) {
-        if ($item['product_id'] == $productId) {
-            // If the product is already in the cart, update the quantity
-            $item['quantity'] += $request->qty;
-            $item['price'] = $item['price_per_unit'] * $item['quantity'];
-            $found = true;
-            break;
+        if (!$product || $product->stock_status == 0) {
+            return redirect()->back()->with('error', 'This product is out of stock and cannot be added to the cart.');
         }
-    }
 
-    // If the product is not found, add a new product to the cart
-    if (!$found) {
-        $loyal_price = $product->loyal_price;
-        $wholesaler_price = $product->wholesaler_price;
-        $normal_price = $product->normal_price;
+        $qty = (int) $request->qty;
+        $price = $this->resolveProductPrice($product);
 
         if (Auth::guard('local')->check()) {
-            $user = Auth::guard('local')->user();
-            if ($user->user_type == "loyal") {
-                $price = $loyal_price;
-            } elseif ($user->user_type == "wholesaler") {
-                $price = $wholesaler_price;
+            $userId = Auth::guard('local')->id();
+            $existingCartItem = Cart::where('user_id', $userId)->where('product_id', $productId)->first();
+
+            if ($existingCartItem) {
+                $existingCartItem->qty += $qty;
+                $existingCartItem->total_price = $existingCartItem->price * $existingCartItem->qty;
+                $existingCartItem->save();
             } else {
-                $price = $normal_price;
+                Cart::create([
+                    'user_id' => $userId,
+                    'product_id' => $productId,
+                    'qty' => $qty,
+                    'price' => $price,
+                    'total_price' => $price * $qty,
+                ]);
             }
-        } else {
-            $price = $product->price;
+
+            return redirect()->route('cart-page')->with('message', 'Product added to cart successfully!');
         }
 
-        $total_price = $price * $request->qty;
-
-        $cart[] = [
-            'product_id' => $productId,
-            'price' => $total_price,
-            'price_per_unit' => $price,
-            'quantity' => $request->qty,
-            'name' => $product->name,
-            'loyal_price' => $loyal_price,
-            'wholesaler_price' => $wholesaler_price,
-        ];
-    }
-
-    Cookie::queue('cart', json_encode($cart), (60 * 24 * 7));
-
-    $userId = Auth::guard('local')->check() ? Auth::guard('local')->id() : null;
-    foreach ($cart as $item) {
-        $existingCartItem = Cart::where('user_id', $userId)->where('product_id', $item['product_id'])->first();
-
-        if ($existingCartItem) {
-            $existingCartItem->qty = $item['quantity'];
-            $existingCartItem->total_price = $existingCartItem->price * $existingCartItem->qty;
-            $existingCartItem->save();
-        } else {
-            Cart::create([
-                'user_id' => $userId,
-                'product_id' => $item['product_id'],
-                'qty' => $item['quantity'],
-                'price' => $item['price_per_unit'],
-                'total_price' => $item['price'],
-            ]);
+        $cart = json_decode(Cookie::get('cart', '[]'), true);
+        if (!is_array($cart)) {
+            $cart = [];
         }
-    }
 
-    return redirect()->route('cart-page')->with('message', 'Product added to cart successfully!');
-}
+        $found = false;
+        foreach ($cart as &$item) {
+            if ($item['product_id'] == $productId) {
+                $item['quantity'] += $qty;
+                $item['price'] = $item['price_per_unit'] * $item['quantity'];
+                $found = true;
+                break;
+            }
+        }
+
+        if (!$found) {
+            $cart[] = [
+                'product_id' => $productId,
+                'price' => $price * $qty,
+                'price_per_unit' => $price,
+                'quantity' => $qty,
+            ];
+        }
+
+        Cookie::queue('cart', json_encode($cart), (60 * 24 * 7));
+
+        return redirect()->route('cart-page')->with('message', 'Product added to cart successfully!');
+    }
 
 
 
@@ -178,21 +159,31 @@ class FrontendController extends Controller
 
     public function remove_tocart(Request $request)
     {
-        // dd($request->all());
-        // Retrieve cart from the cookie
-        $cart = json_decode($request->cookie('cart'), true);
-        // dd($cart);
-        // Check if the cart exists and the item ID is provided
-        if ($cart && $request->has('item_id')) {
-            $itemId = $request->input('item_id');
+        if (!$request->has('item_id')) {
+            return redirect()->back()->with('error', 'Item not found in cart!');
+        }
 
-            // Remove the item using the correct key
+        $itemId = $request->input('item_id');
+
+        if (Auth::guard('local')->check()) {
+            $userId = Auth::guard('local')->id();
+            $deleted = Cart::where('user_id', $userId)->where('product_id', $itemId)->delete();
+
+            if ($deleted) {
+                return redirect()->back()->with('success', 'Item removed from cart!');
+            }
+
+            return redirect()->back()->with('error', 'Item not found in cart!');
+        }
+
+        $cart = json_decode($request->cookie('cart'), true);
+        if ($cart) {
             $cart = array_filter($cart, function ($item) use ($itemId) {
-                return $item['product_id'] != $itemId; // Use 'product_id' or the correct key
+                return $item['product_id'] != $itemId;
             });
 
-            // Save the updated cart back to the cookie
-            Cookie::queue('cart', json_encode(array_values($cart)), 60); // Save for 60 minutes
+            Cookie::queue('cart', json_encode(array_values($cart)), 60);
+
             return redirect()->back()->with('success', 'Item removed from cart!');
         }
 
@@ -203,40 +194,55 @@ class FrontendController extends Controller
     public function add_cartpage()
     {
         $totalSubTotal = 0;
-        // $shippingCost = 0;
-        // $tax = 0;
         $totalItems = 0;
         $cart = [];
+        $cartItems = collect();
 
-        // Only process cart if user is authenticated
-        // Guests shouldn't have items in cart
         if (Auth::guard('local')->check()) {
-            $cart = json_decode(Cookie::get('cart', '[]'), true);
+            $userId = Auth::guard('local')->id();
+            $this->mergeCookieCartIntoDatabase($userId);
 
-            foreach ($cart as $item) {
-                $totalSubTotal += $item['price'];
-                $totalItems += $item['quantity'];
+            $cartItems = Cart::with('product')->where('user_id', $userId)->get();
+
+            foreach ($cartItems as $item) {
+                $product = $item->product;
+                if (!$product || $product->trashed()) {
+                    continue;
+                }
+
+                $cart[] = [
+                    'product_id' => $item->product_id,
+                    'name' => $product->name ?? '',
+                    'price' => (float) $item->total_price,
+                    'quantity' => (int) $item->qty,
+                    'price_per_unit' => (float) $item->price,
+                ];
+                $totalSubTotal += $item->total_price;
+                $totalItems += $item->qty;
             }
         }
 
-        // $tax = $totalSubTotal * 0.05;
-        $shippingCost = 0; // Update based on your shipping logic
-        // $totalAmount = $totalSubTotal + $shippingCost + $tax;
+        $shippingCost = 0;
         $totalAmount = $totalSubTotal;
-
-        $userId = auth()->id();
-        $cartItems = Cart::with('product')->where('user_id', $userId)->get();
         $categorys = Category::all();
-                $brands = Brands::all();
+        $brands = Brands::all();
 
+        return view('stc_products.cart-page', compact('cart', 'cartItems', 'categorys', 'totalSubTotal', 'shippingCost', 'totalAmount', 'totalItems', 'brands'));
+    }
 
-        return view('stc_products.cart-page', compact('cartItems', 'categorys', 'totalSubTotal', 'shippingCost', 'totalAmount', 'totalItems','brands'));
+    public function getCartCount()
+    {
+        return response()->json(['count' => CartHelper::getTotalItems()]);
     }
 
     public function getCartData(Request $request)
     {
         $userId = $request->input('user_id');
-        
+
+        if (Auth::guard('local')->check()) {
+            $userId = Auth::guard('local')->id();
+        }
+
         // For logged-in users, use database Cart table (no size limit)
         // For guests, use cookie cart
         if ($userId) {
@@ -370,7 +376,7 @@ class FrontendController extends Controller
     
     // Validate products against cart
     
-    // Filter out any products that aren't in the current cookie cart
+    // Filter out any products that aren't in the current cart
     $filteredProductIds = [];
     $filteredQuantities = [];
     foreach ($productIds as $index => $productId) {
@@ -456,36 +462,97 @@ public function updateQuantity(Request $request)
         'product_id' => 'required|integer',
         'quantity' => 'required|integer|min:1|max:10',
     ]);
-    $cart = json_decode(Cookie::get('cart', '[]'), true);
-    
-    // Find product in cart and update its quantity
-    foreach ($cart as &$item) {
-        if ($item['product_id'] == $request->product_id) {
-            $item['quantity'] = $request->quantity;
-            $item['price'] = ($request->quantity * $item['price_per_unit']);
-            break;
-        }
-    }
 
-    Cookie::queue('cart', json_encode(array_values($cart)), 60);
     if (Auth::guard('local')->check() && Auth::guard('local')->id() == $request->user_id) {
-        // Update only the logged-in user's product
         $cartItem = Cart::where('user_id', $request->user_id)
             ->where('product_id', $request->product_id)
             ->first();
 
         if ($cartItem) {
             $cartItem->qty = $request->quantity;
-            $cartItem->total_price = ($request->quantity * $cartItem->price);
+            $cartItem->total_price = $request->quantity * $cartItem->price;
             $cartItem->save();
+
             return response()->json(['message' => 'Quantity updated successfully']);
         }
 
         return response()->json(['message' => 'Item not found'], 404);
     }
 
-    return response()->json(['message' => 'Unauthorized'], 403);
+    $cart = json_decode(Cookie::get('cart', '[]'), true);
+    foreach ($cart as &$item) {
+        if ($item['product_id'] == $request->product_id) {
+            $item['quantity'] = $request->quantity;
+            $item['price'] = $request->quantity * $item['price_per_unit'];
+            break;
+        }
+    }
+
+    Cookie::queue('cart', json_encode(array_values($cart)), 60);
+
+    return response()->json(['message' => 'Quantity updated successfully']);
 }
+
+    protected function resolveProductPrice(Product $product): float
+    {
+        if (Auth::guard('local')->check()) {
+            $user = Auth::guard('local')->user();
+            if ($user->user_type == 'loyal') {
+                return (float) $product->loyal_price;
+            }
+            if ($user->user_type == 'wholesaler') {
+                return (float) $product->wholesaler_price;
+            }
+
+            return (float) $product->normal_price;
+        }
+
+        return (float) $product->price;
+    }
+
+    protected function mergeCookieCartIntoDatabase(int $userId): void
+    {
+        $cookieCart = json_decode(Cookie::get('cart', '[]'), true);
+        if (!is_array($cookieCart) || empty($cookieCart)) {
+            return;
+        }
+
+        foreach ($cookieCart as $item) {
+            if (!isset($item['product_id'], $item['quantity'])) {
+                continue;
+            }
+
+            $product = Product::find($item['product_id']);
+            if (!$product || $product->trashed()) {
+                continue;
+            }
+
+            $qty = (int) $item['quantity'];
+            $pricePerUnit = isset($item['price_per_unit'])
+                ? (float) $item['price_per_unit']
+                : $this->resolveProductPrice($product);
+
+            $existingCartItem = Cart::where('user_id', $userId)
+                ->where('product_id', $item['product_id'])
+                ->first();
+
+            if ($existingCartItem) {
+                $existingCartItem->qty = max($existingCartItem->qty, $qty);
+                $existingCartItem->total_price = $existingCartItem->price * $existingCartItem->qty;
+                $existingCartItem->save();
+            } else {
+                Cart::create([
+                    'user_id' => $userId,
+                    'product_id' => $item['product_id'],
+                    'qty' => $qty,
+                    'price' => $pricePerUnit,
+                    'total_price' => $pricePerUnit * $qty,
+                ]);
+            }
+        }
+
+        Cookie::queue('cart', json_encode([]), 0);
+    }
 
 
 
