@@ -21,6 +21,8 @@ class Customer extends Model implements Authenticatable
         'phone',
         'email',
         'password',
+        'login_device_hash',
+        'status',
     ];
     
 }

@@ -15,6 +15,7 @@ use PhpParser\Node\Expr\Cast\Object_;
 use Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Cart;
+use App\Services\CustomerDeviceLoginService;
 
 
 
@@ -177,8 +178,6 @@ class AuthController extends Controller
             'password' => 'required|min:6'
         ]);
 
-
-
         $email = $request->email;
         $password = $request->password;
 
@@ -188,39 +187,27 @@ class AuthController extends Controller
             return redirect()->back()->with(['failed' => 'Your account is not registered']);
         }
 
-        if (Auth::guard('local')->attempt(['email' => $email, 'password' => $password,'status'=>'1'])) {
-            // dd(auth()->guard('local')->user());
-            if (isset($_COOKIE['cart_session'])) {
+        if ((string) $user->status !== '1') {
+            return redirect()->back()->with(['failed' => CustomerDeviceLoginService::PAUSED_MESSAGE]);
+        }
 
-                $sessionproductIds = Cart::select('product_id')
-                    ->where('user_id', $_COOKIE['cart_session'])
-                    ->groupBy('product_id')
-                    ->get();
-                if (count($sessionproductIds)) {
-                    //if same user_id and same product id then delete first record
-                    $productIds = Cart::select('product_id')
-                        ->where('user_id', $user->id)
-                        ->whereIn('product_id', $sessionproductIds)
-                        ->groupBy('product_id')
-
-                        ->get();
-
-                    foreach ($productIds as $productId) {
-
-                        $firstRecordToDelete = Cart::whereRaw('user_id = "' . $user->id . '"')
-                            ->where('product_id', $productId->product_id)
-                            ->delete();
-
-                    }
-
-                    Cart::where('user_id', $_COOKIE['cart_session'])->update(['user_id' => $user->id]);
-                }
-            }
-
-            return redirect()->route('index')->with(['status' => 'true', 'message' => 'Login successfully']);
-        } else {
+        if (!Hash::check($password, $user->password)) {
             return redirect()->back()->with(['status' => 'false', 'failed' => 'The provided credentials do not match our records']);
         }
+
+        $deviceLogin = app(CustomerDeviceLoginService::class);
+        $evaluation = $deviceLogin->evaluateLogin($user, $request);
+
+        if (!$evaluation['allowed']) {
+            return redirect()->back()->with(['failed' => $evaluation['message']]);
+        }
+
+        Auth::guard('local')->login($user);
+        $this->mergeGuestCartAfterLogin($user);
+
+        $response = redirect()->route('index')->with(['status' => 'true', 'message' => 'Login successfully']);
+
+        return $deviceLogin->queueDeviceCookie($response, $evaluation['device_uid']);
 
 
         // $validator = Validator::make($request->all(), [
@@ -380,38 +367,27 @@ class AuthController extends Controller
         if ($existingUser) {
             if ($otp == $existingUser->otp) {
 
+                if ((string) $existingUser->status !== '1') {
+                    return response()->json(['status' => false, 'message' => CustomerDeviceLoginService::PAUSED_MESSAGE]);
+                }
+
+                $existingUser->refresh();
+                $deviceLogin = app(CustomerDeviceLoginService::class);
+                $evaluation = $deviceLogin->evaluateLogin($existingUser, $request);
+
+                if (!$evaluation['allowed']) {
+                    return response()->json(['status' => false, 'message' => $evaluation['message']]);
+                }
+
                 auth()->guard('local')->login($existingUser);
 
                 Customer::where('id', $existingUser->id)->update(['otp' => '']);
 
-                if (isset($_COOKIE['cart_session'])) {
+                $this->mergeGuestCartAfterLogin($existingUser);
 
-                    $sessionproductIds = Cart::select('product_id')
-                        ->where('user_id', $_COOKIE['cart_session'])
-                        ->groupBy('product_id')
-                        ->get();
-                    if (count($sessionproductIds)) {
-                        //if same user_id and same product id then delete first record
-                        $productIds = Cart::select('product_id')
-                            ->where('user_id', $existingUser->id)
-                            ->whereIn('product_id', $sessionproductIds)
-                            ->groupBy('product_id')
+                $response = response()->json(['status' => true, 'message' => 'Login successfully']);
 
-                            ->get();
-
-                        foreach ($productIds as $productId) {
-
-
-                            $firstRecordToDelete = Cart::whereRaw('user_id = "' . $existingUser->id . '"')
-                                ->where('product_id', $productId->product_id)
-                                ->delete();
-
-                        }
-
-                        Cart::where('user_id', $_COOKIE['cart_session'])->update(['user_id' => $existingUser->id]);
-                    }
-                }
-                return response()->json(['status' => true, 'message' => 'Login successfully']);
+                return $deviceLogin->queueDeviceCookie($response, $evaluation['device_uid']);
             } else {
                 return response()->json(['status' => false, 'message' => 'Please enter valid OTP']);
             }
@@ -452,39 +428,20 @@ class AuthController extends Controller
 
             if ($signup) {
 
-                auth()->guard('local')->login($user);
+                $user->refresh();
+                $deviceLogin = app(CustomerDeviceLoginService::class);
+                $evaluation = $deviceLogin->evaluateLogin($user, $request);
 
-                if (isset($_COOKIE['cart_session'])) {
-
-                    $sessionproductIds = Cart::select('product_id')
-                        ->where('user_id', $_COOKIE['cart_session'])
-                        ->groupBy('product_id')
-                        ->get();
-                    if (count($sessionproductIds)) {
-                        //if same user_id and same product id then delete first record
-                        $productIds = Cart::select('product_id')
-                            ->where('user_id', $user->id)
-                            ->whereIn('product_id', $sessionproductIds)
-                            ->groupBy('product_id')
-
-                            ->get();
-
-                        foreach ($productIds as $productId) {
-
-                            $firstRecordToDelete = Cart::where('user_id = "' . $user->id . '"')
-                                ->where('product_id', $productId->product_id)
-                                ->delete();
-
-
-
-                        }
-
-                        Cart::where('user_id', $_COOKIE['cart_session'])->update(['user_id' => $user->id]);
-                    }
+                if (!$evaluation['allowed']) {
+                    return response()->json(['status' => false, 'message' => $evaluation['message']]);
                 }
 
+                auth()->guard('local')->login($user);
+                $this->mergeGuestCartAfterLogin($user);
 
-                return response()->json(['status' => 'true', 'message' => 'Profile created successfully']);
+                $response = response()->json(['status' => 'true', 'message' => 'Profile created successfully']);
+
+                return $deviceLogin->queueDeviceCookie($response, $evaluation['device_uid']);
             } else {
                 return ["status" => false, "message" => "Oops! Something went wrong try again"];
             }
@@ -556,5 +513,35 @@ class AuthController extends Controller
         } else {
             return response()->json(['status' => 'false', 'message' => 'Your account is not registered']);
         }
+    }
+
+    protected function mergeGuestCartAfterLogin(Customer $user): void
+    {
+        if (!isset($_COOKIE['cart_session'])) {
+            return;
+        }
+
+        $sessionproductIds = Cart::select('product_id')
+            ->where('user_id', $_COOKIE['cart_session'])
+            ->groupBy('product_id')
+            ->get();
+
+        if (!count($sessionproductIds)) {
+            return;
+        }
+
+        $productIds = Cart::select('product_id')
+            ->where('user_id', $user->id)
+            ->whereIn('product_id', $sessionproductIds)
+            ->groupBy('product_id')
+            ->get();
+
+        foreach ($productIds as $productId) {
+            Cart::where('user_id', $user->id)
+                ->where('product_id', $productId->product_id)
+                ->delete();
+        }
+
+        Cart::where('user_id', $_COOKIE['cart_session'])->update(['user_id' => $user->id]);
     }
 }

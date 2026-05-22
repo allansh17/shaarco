@@ -16,6 +16,7 @@ use App\Mail\CustomerMail;
 
 use DataTables, Auth;
 use Illuminate\Support\Facades\DB;
+use App\Services\CustomerDeviceLoginService;
 
 class CustomerController extends Controller
 {
@@ -473,10 +474,12 @@ $password = '<a href="javascript:void(0)" onclick="updatePassword(' . $value->id
                 if (isset($request->type) && $request->type == 'status') {
                     if ($request->value == "1") {
                         $item->status = '1';
+                        app(CustomerDeviceLoginService::class)->clearRegisteredDevice($item);
                     } else {
                         $item->status = '2';
-                        Auth::guard('local')->logout($item);
-                       
+                        if (Auth::guard('local')->check() && (int) Auth::guard('local')->id() === (int) $item->id) {
+                            Auth::guard('local')->logout();
+                        }
                     }
                 }
                 $item->save();
