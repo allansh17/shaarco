@@ -157,24 +157,16 @@
             <!-- Brands Grid -->
             <div class="brands_grid" id="brandsGrid">
                 @foreach($brands as $brand)
-                <div class="brand_bubble" data-brand-id="{{ $brand->id }}" data-brand-name="{{ $brand->name }}">
+                <div class="brand_bubble" data-brand-id="{{ $brand->id }}" data-brand-name="{{ $brand->name }}" title="{{ $brand->name }}">
                     <div class="bubble_content">
                         <div class="brand_logo_container">
                             @if($brand->image && file_exists(public_path('uploads/Brands/' . $brand->image)))
                                 <img src="{{ asset('uploads/Brands/' . $brand->image) }}" alt="{{ $brand->name }}" class="brand_logo">
                             @else
-                                <!-- Fallback when no image -->
                                 <div class="brand_logo_fallback">
                                     <i class="{{ get_brand_icon($brand->name) }}"></i>
                                 </div>
                             @endif
-                        </div>
-                        <div class="brand_info">
-                            <h4>{{ $brand->name }}</h4>
-                            <span class="brand_count">{{ $brand->categories ? $brand->categories->count() : 0 }} فئة</span>
-                        </div>
-                        <div class="bubble_arrow">
-                            <i class="fas fa-chevron-left"></i>
                         </div>
                     </div>
                 </div>
