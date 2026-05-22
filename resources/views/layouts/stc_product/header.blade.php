@@ -28,7 +28,7 @@
     <!-- Toastr CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
     <!-- custome-css -->
-    <link rel="stylesheet" href="{{ asset('stc_css/style.css') }}?v=20260521" />
+    <link rel="stylesheet" href="{{ asset('stc_css/style.css') }}?v={{ @filemtime(public_path('stc_css/style.css')) ?: time() }}" />
 
     <title>@yield('title', 'Home-page')</title>
     @stack('head')

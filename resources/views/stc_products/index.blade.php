@@ -22,17 +22,37 @@
         padding: 10px;
         box-sizing: border-box;
     }
-    /* Best brands logos: larger, centered, contained */
-    .brands_section:not(.shop_cat) .brand_carousel .brand_img img {
-        width: auto;
-        max-width: 100%;
-        max-height: 150px;
-        height: auto;
-        object-fit: contain;
-        border-radius: 12px;
-        display: block;
+    /* Best brands grid (homepage) - keep in sync with style.css */
+    .brands_section:not(.shop_cat) .brands_grid {
+        grid-template-columns: repeat(auto-fill, minmax(155px, 190px));
+        justify-content: center;
+        gap: 18px;
+    }
+    .brands_section:not(.shop_cat) .brand_bubble {
+        max-width: 190px;
+        width: 100%;
         margin: 0 auto;
-        background: #fff;
+        aspect-ratio: 1 / 1;
+        min-height: 0;
+        padding: 8px;
+    }
+    .brands_section:not(.shop_cat) .brand_logo_container {
+        flex: 1 1 auto;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        padding: 0;
+    }
+    .brands_section:not(.shop_cat) .brand_logo {
+        position: absolute !important;
+        inset: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: none !important;
+        max-height: none !important;
+        object-fit: contain !important;
+        object-position: center;
     }
     @media (max-width: 991px) {
         .imag_offer {
