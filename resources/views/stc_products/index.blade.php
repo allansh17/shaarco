@@ -4,31 +4,13 @@
     .owl-nav {
         display: none;
     }
-    .brand_img img {
-        width: 100%;
-        height: 180px;
-        object-fit: cover;
-        border-radius: 12px;
-        display: block;
-    }
-    /* Shop by categories images: uniform and well-fitted */
-    .shop_cat .brand_img img {
-        width: 100%;
-        height: 180px;
-        object-fit: contain;
-        border-radius: 12px;
-        display: block;
-        background: #fff;
-        padding: 10px;
-        box-sizing: border-box;
-    }
     /* Best brands grid (homepage) - keep in sync with style.css */
-    .brands_section:not(.shop_cat) .brands_grid {
+    .brands_section .brands_grid {
         grid-template-columns: repeat(auto-fill, minmax(155px, 190px));
         justify-content: center;
         gap: 18px;
     }
-    .brands_section:not(.shop_cat) .brand_bubble {
+    .brands_section .brand_bubble {
         max-width: 190px;
         width: 100%;
         margin: 0 auto;
@@ -36,7 +18,7 @@
         min-height: 0;
         padding: 8px;
     }
-    .brands_section:not(.shop_cat) .brand_logo_container {
+    .brands_section .brand_logo_container {
         flex: 1 1 auto;
         position: relative;
         width: 100%;
@@ -44,7 +26,7 @@
         min-height: 0;
         padding: 0;
     }
-    .brands_section:not(.shop_cat) .brand_logo {
+    .brands_section .brand_logo {
         position: absolute !important;
         inset: 0 !important;
         width: 100% !important;
@@ -68,22 +50,6 @@
             height: 100% !important;
             object-fit: contain !important;
         }
-    }
-    /* Add border to the whole Shop by Categories carousel */
-    .brands_section.shop_cat .brand_slider {
-        border: 2px solid #3887CD;
-        border-radius: 18px;
-        padding: 18px 10px 10px 10px;
-        background: #fafdff;
-        margin-bottom: 32px;
-    }
-    /* Shop by categories section border */
-    .brands_section.shop_cat {
-        border: 2px solid #b3d6f5;
-        border-radius: 24px;
-        background: #f6fbff;
-        padding: 28px 0 18px 0;
-        margin-bottom: 40px;
     }
     /* Newly Arrived section border with fancy effect */
     .product_slider {
@@ -168,8 +134,7 @@
 <div class="brands_section">
     <div class="container">
         <div class="hedding_part">
-            <h2>أفضل العلامات التجارية</h2>
-            <p class="section_subtitle">اختر العلامة التجارية لتصفح الفئات والمنتجات</p>
+            <h2>أبرز التصنيفات</h2>
         </div>
         
         <!-- Brand Navigation Container -->
@@ -227,71 +192,6 @@
 <!-- End brands section -->
 
 
-<!-- Shop by Categories section -->
-<div class="brands_section shop_cat">
-    <div class="container">
-        <div class="hedding_part d-flex">
-            <h2>التسوق حسب الفئات</h2>
-            <div class="btn_all">
-                <a href="{{route('products')}}">عرض الكل <svg width="21" height="20" viewBox="0 0 21 20" fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path d="M17.375 10H3.625" stroke="#3887CD" stroke-width="1.5" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                        <path d="M9.25 4.375L3.625 10L9.25 15.625" stroke="#3887CD" stroke-width="1.5"
-                            stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-        <div class="brand_slider">
-            <div class="owl-carousel brand_carousel">
-                @foreach($categorys as $category)
-                <a href="{{route('products',['categories[]' => $category->id])}}">
-
-                    <div class="item">
-                        <div class="brand_img">
-                            <img src="{{asset('uploads/Category/' . $category->image)}}" alt="">
-                        </div>
-                        <h4 style="color: black;">{{$category->name}}</h4>
-                       
-                    </div>
-                    </a>
-                @endforeach
-                <!-- <div class="item">
-    <div class="brand_img">
-        <img src="./images/cat_imag2.png" alt="">
-    </div>
-    <h4>تنظيف غسالة الضغط</h4>
-</div>
-
-<div class="item">
-    <div class="brand_img">
-        <img src="./images/cat_imag3.png" alt="">
-    </div>
-    <h4>تنظيف غسالة الضغط</h4>
-</div>
-
-<div class="item">
-    <div class="brand_img">
-        <img src="./images/cat_imag4.png" alt="">
-    </div>
-    <h4>تنظيف غسالة الضغط</h4>
-</div>
-
-<div class="item">
-    <div class="brand_img">
-        <img src="./images/cat_imag5.png" alt="">
-    </div>
-    <h4>تنظيف غسالة الضغط</h4>
-</div> -->
-
-
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- End Shop by Categories section -->
 
 
 <!-- Product Section -->

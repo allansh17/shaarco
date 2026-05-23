@@ -90,8 +90,7 @@ class HomeController extends Controller
             ->orderBy('products.created_at', 'desc')
             ->limit(2)
             ->get();
-        $categorys = Category::with('subcategories')->get();
-        return view('stc_products.index', compact('ads','sliders', 'brands', 'products', 'categorys', 'mostproducts'));
+        return view('stc_products.index', compact('ads','sliders', 'brands', 'products', 'mostproducts'));
     }
 
     public function getBrandCategories($brandId)
