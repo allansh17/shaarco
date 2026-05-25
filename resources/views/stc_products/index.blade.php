@@ -491,6 +491,19 @@
 $(document).ready(function() {
     // Brand navigation data
     const brandsData = @json($brands);
+    const categoryImageBase = @json(asset('uploads/Category'));
+
+    function categoryThumbHtml(category) {
+        if (category.image) {
+            const src = categoryImageBase + '/' + category.image;
+            return `<div class="category_thumb category_thumb--photo">
+                <img src="${src}" alt="">
+            </div>`;
+        }
+        return `<div class="category_thumb category_thumb--fallback">
+            <i class="fas fa-layer-group"></i>
+        </div>`;
+    }
     
     // Show categories when brand bubble is clicked
     $('.brand_bubble').click(function() {
@@ -527,15 +540,10 @@ $(document).ready(function() {
             const categoryHtml = `
                 <div class="category_bubble" data-category-id="${category.id}" data-brand-id="${brand.id}" data-category-name="${category.name}">
                     <div class="bubble_content">
-                        <div class="category_icon">
-                            <i class="fas fa-layer-group"></i>
-                        </div>
+                        ${categoryThumbHtml(category)}
                         <div class="category_info">
                             <h4>${category.name}</h4>
                             <span class="category_count">${category.subcategories ? category.subcategories.length : 0} فئة فرعية</span>
-                        </div>
-                        <div class="bubble_arrow">
-                            <i class="fas fa-chevron-left"></i>
                         </div>
                     </div>
                 </div>
