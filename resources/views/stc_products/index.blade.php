@@ -362,8 +362,7 @@
                                 
                                    
                                     <div class="hero_imagess" id="bannerr-img">
-                                        <img src="{{ asset('uploads/ad_image/' . $slider->image) }}" alt="First slide"
-                                            style="width: 100%; max-height:360px;">
+                                        <img src="{{ asset('uploads/ad_image/' . $slider->image) }}" alt="First slide">
 
                                     </div>
 
@@ -623,25 +622,27 @@ $(document).ready(function() {
 
 <script>
     $(document).ready(function () {
+        if ($(".hero_carousel").hasClass("owl-loaded")) {
+            $(".hero_carousel").trigger("destroy.owl.carousel");
+        }
         $(".hero_carousel").owlCarousel({
-            loop: true, // Enable infinite loop
-            margin: 10, // Add space between items
-            nav: true, // Enable navigation arrows
-            autoplay: true, // Enable auto-slide
-            autoplayTimeout: 5000, // Set time between slides (in milliseconds)
-            autoplayHoverPause: true, // Pause on hover
-            rtl: true, // Enable RTL if needed
+            loop: true,
+            margin: 10,
+            nav: true,
+            dots: true,
+            autoplay: true,
+            autoplayTimeout: 5000,
+            autoplayHoverPause: true,
+            rtl: true,
+            autoHeight: true,
             responsive: {
-                0: {
-                    items: 1 // Show 1 item on small screens
-                },
-                768: {
-                    items: 1 // Show 1 item on medium screens
-                },
-                1200: {
-                    items: 1 // Show 1 item on large screens
-                }
+                0: { items: 1 },
+                768: { items: 1 },
+                1200: { items: 1 }
             }
+        });
+        $(".hero_slider .hero_carousel .item img").on("load", function () {
+            $(".hero_carousel").trigger("refresh.owl.carousel");
         });
     });
 </script>

@@ -564,14 +564,21 @@
                 dots: true,
                 autoplay: true,
                 autoplayTimeout: 5000000,
-                rtl: true, // Enable RTL mode
-                dots: true, // Ensure dots are enabled
+                rtl: true,
+                autoHeight: true,
                 responsive: {
                     0: {
                         items: 1
                     }
                 }
             });
+
+            function refreshHeroCarousel() {
+                $(".hero_carousel").trigger("refresh.owl.carousel");
+            }
+
+            $(".hero_slider .hero_carousel .item img").on("load", refreshHeroCarousel);
+            $(window).on("resize", refreshHeroCarousel);
             $('#search').on('keydown', function (e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();

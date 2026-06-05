@@ -231,22 +231,32 @@ button#categoryDropdown {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-height: 560px;text-align: center;
+    position: relative;
+    max-height: 560px;
+    text-align: center;
   }
   .slider_btn_hero {
     position: absolute;
     right: 0;
     left: 0;
     bottom: 50px;
+    z-index: 2;
 }
   
   .hero_slider .hero_carousel .item img {
+    display: block;
+    width: 100%;
     max-width: 100%;
     height: 100% !important;
-     object-fit: cover;
+    object-fit: cover;
+    object-position: center;
   }
 
-  .hero_images { width: 100%; }
+  .hero_images,
+  .hero_imagess {
+    width: 100%;
+    line-height: 0;
+  }
 
 
   .hero_card {
@@ -256,6 +266,7 @@ button#categoryDropdown {
     padding: 0px 0;
     overflow: hidden;
     max-height: 560px;
+    position: relative;
 }
 
 .hero_card .owl-dots {
@@ -275,6 +286,24 @@ button#categoryDropdown {
 .hero_card button.owl-dot.active {
     background: #3887CD !important;
 }
+
+@media (min-width: 768px) {
+    .hero_card {
+        height: 560px;
+        max-height: 560px;
+    }
+
+    .hero_slider .hero_carousel .item {
+        height: 560px;
+        max-height: 560px;
+    }
+
+    .hero_images,
+    .hero_imagess {
+        height: 100%;
+    }
+}
+
 .slider_contant {
     padding: 0 40px;    width: 40%;
 }
@@ -2101,9 +2130,32 @@ button.btn.btn-mobal svg {
 }
 
 @media (max-width:767px) {
-    .hero_slider .hero_carousel .item {
-        flex-wrap: wrap;
+    .hero_card {
+        max-height: none;
+        height: auto;
     }
+
+    .hero_slider .hero_carousel .item {
+        display: block;
+        max-height: none;
+        height: auto;
+    }
+
+    .hero_slider .hero_carousel .item img {
+        width: 100%;
+        height: auto !important;
+        max-height: none;
+        object-fit: contain;
+    }
+
+    .hero_card .owl-dots {
+        position: relative;
+        bottom: auto;
+        right: auto;
+        text-align: center;
+        padding: 8px 0 6px;
+    }
+
     .brand_slider .owl-nav {
         left: 0;
         right: 0;
@@ -2114,7 +2166,7 @@ button.btn.btn-mobal svg {
         padding-right: 0;
         margin-top: 30px;
     }
-    .slider_btn_hero { bottom: 30px;}
+    .slider_btn_hero { bottom: 14px;}
     .lSSlideWrapper.usingCss {
         max-height: 360px;
     height: 360px;
