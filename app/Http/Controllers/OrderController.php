@@ -565,33 +565,76 @@ class OrderController extends Controller
     public function view($id, Request $request)
     {
         try {
-            $id = base64_decode($id);
-            $data = array();
-            $data['order'] = $orders =  Checkout::select('checkouts.*', 'customers.first_name', 'customers.last_name', 'customers.image as profileImage', 'customers.email', 'customers.phone', 'customers.user_type')->join('customers', 'customers.id', 'checkouts.user_id')->findOrFail($id);
-            $data['product_order'] = $p_orders = ProductOrder::select('product_orders.*', 'products.*', 'category.name as category_name','brands.name as brand_name')->join('products', 'products.id', 'product_orders.product_id')->leftJoin('category', 'category.id', 'products.category_id')->leftJoin('brands', 'brands.id', '=', 'products.brands') ->where('checkout_id', $id)->get();
-
-            $userType = $orders->user_type ?? 'normal';
-            $orderSubtotal = 0;
-            $orderItemCount = 0;
-            foreach ($p_orders as $p_order) {
-                $unitPrice = $this->resolveInquiryUnitPrice($p_order, $userType);
-                $p_order->unit_price = $unitPrice;
-                $p_order->line_total = $unitPrice * (int) $p_order->qty;
-                $orderSubtotal += $p_order->line_total;
-                $orderItemCount += (int) $p_order->qty;
-            }
-            $data['order_subtotal'] = $orderSubtotal;
-            $data['order_item_count'] = $orderItemCount;
-
-            $data['shipping_address'] = CustomerAddress::select('*')->where('id', $orders->customer_address_id)->first();
-            $data['billing_address'] = CustomerAddress::select('*')->where('id', $orders->customer_billingaddress_id)->first();
-            $data['total_order'] = Checkout::where('user_id', $orders->user_id)->count();
+            $data = $this->buildOrderViewData(base64_decode($id));
 
             return view('content/order/product_view')->with($data);
         } catch (\Exception $e) {
             $res = array('code' => 201, 'msg' => 'Something went wrong! Try again' . $e);
         }
         return json_encode($res);
+    }
+
+    public function printOrder($id, Request $request)
+    {
+        try {
+            $data = $this->buildOrderViewData(base64_decode($id));
+            $data['company'] = MasterCompanySetting::first();
+            $data['order_status_label'] = $this->orderStatusLabel($data['order']->order_status);
+
+            return view('content/order/print_order')->with($data);
+        } catch (\Exception $e) {
+            abort(404);
+        }
+    }
+
+    protected function buildOrderViewData(int $id): array
+    {
+        $data = [];
+        $data['order'] = $orders = Checkout::select(
+            'checkouts.*',
+            'customers.first_name',
+            'customers.last_name',
+            'customers.image as profileImage',
+            'customers.email',
+            'customers.phone',
+            'customers.user_type'
+        )->join('customers', 'customers.id', 'checkouts.user_id')->findOrFail($id);
+
+        $data['product_order'] = $p_orders = ProductOrder::select(
+            'product_orders.*',
+            'products.*',
+            'category.name as category_name',
+            'brands.name as brand_name'
+        )->join('products', 'products.id', 'product_orders.product_id')
+            ->leftJoin('category', 'category.id', 'products.category_id')
+            ->leftJoin('brands', 'brands.id', '=', 'products.brands')
+            ->where('checkout_id', $id)
+            ->get();
+
+        $userType = $orders->user_type ?? 'normal';
+        $orderSubtotal = 0;
+        $orderItemCount = 0;
+        foreach ($p_orders as $p_order) {
+            $unitPrice = $this->resolveInquiryUnitPrice($p_order, $userType);
+            $p_order->unit_price = $unitPrice;
+            $p_order->line_total = $unitPrice * (int) $p_order->qty;
+            $orderSubtotal += $p_order->line_total;
+            $orderItemCount += (int) $p_order->qty;
+        }
+        $data['order_subtotal'] = $orderSubtotal;
+        $data['order_item_count'] = $orderItemCount;
+        $data['shipping_address'] = CustomerAddress::select('*')->where('id', $orders->customer_address_id)->first();
+        $data['billing_address'] = CustomerAddress::select('*')->where('id', $orders->customer_billingaddress_id)->first();
+        $data['total_order'] = Checkout::where('user_id', $orders->user_id)->count();
+
+        return $data;
+    }
+
+    protected function orderStatusLabel($status): string
+    {
+        $labels = ['0' => 'Pending', '2' => 'Shipped', '4' => 'Delivered', '5' => 'Cancelled'];
+
+        return $labels[(string) $status] ?? 'Unknown';
     }
 
     public function delete(Request $request)

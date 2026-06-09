@@ -258,6 +258,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('order/product_status', [OrderController::class, 'order_status'])->name('order.product_status');
     Route::post('order/status', [OrderController::class, 'status_update'])->name('order.status');
     Route::get('order/view/{id}', [OrderController::class, 'view']);
+    Route::get('order/print/{id}', [OrderController::class, 'printOrder'])->name('order.print');
     Route::get('order/downloadinvoice/{id}', [OrderController::class, 'download_order_invoice'])->name('order.download_invoice');
 
     // end -------

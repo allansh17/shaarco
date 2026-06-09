@@ -5,7 +5,10 @@
 <div class="card">
     <div class="card-header justify-content-between d-flex">
         <h3>{{ __('View Order Details') }}</h3>
-        <div class="pull-right">
+        <div class="pull-right d-flex gap-2">
+            <a class="btn btn-outline-secondary" href="{{ route('order.print', base64_encode($order->id)) }}" target="_blank" rel="noopener">
+                <i class='bx bx-printer'></i> Print Order
+            </a>
             <a class="btn btn-primary" href="{{ url('order') }}">
                 <i class='bx bx-list-ul'></i> List of Orders
             </a>
