@@ -185,14 +185,16 @@
 $.validator.addMethod(
   "regex",
   function(value, element) {
-    return value.match(/^[a-zA-Z ]*$/);
+    if (!value) return true;
+    return /^[\u0600-\u06FFa-zA-Z\s'\-.]+$/.test(value);
   },
-  "Only alphabetic characters are allowed."
+  "Arabic and English letters only."
 );
 $.validator.addMethod(
   "address",
   function(value, element) {
-    return value.match(/^[-a-zA-Z0-9., ]*$/);
+    if (!value) return true;
+    return /^[\u0600-\u06FFa-zA-Z0-9., \s'-]+$/.test(value);
   },
   "Special characters are not allowed."
 );
