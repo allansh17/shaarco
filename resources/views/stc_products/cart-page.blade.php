@@ -39,6 +39,18 @@
         line-height: 1.35;
         word-break: break-word;
     }
+    .guest-captcha-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .guest-captcha-box img {
+        height: 50px;
+        border: 1px solid #E4E7E9;
+        border-radius: 4px;
+        background: #fff;
+    }
 </style>
 @endpush
 
@@ -69,8 +81,8 @@
             <div class="col-md-8">
                 <div class="cart_list">
                     <h3>بطاقة التسوق</h3>
-                    {{-- Cart list from database for logged-in customers (no cookie size limit) --}}
-                    @if (!empty($cart) && Auth::guard('local')->check())
+                    {{-- Cart list for logged-in customers and guests --}}
+                    @if (!empty($cart))
                                 <div class="cart-items-scroll">
                                 <table class="cart-table">
                                     <thead>
@@ -107,17 +119,7 @@
                                                                         </div>
                                                                     </div>
                                                                 </td>
-                                                                @if(Auth::guard('local')->check())
-                                                                                        @if(
-                                                                                                Auth::guard('local')->user()->user_type == "normal" ||
-                                                                                                Auth::guard('local')->user()->user_type == "loyal" ||
-                                                                                                Auth::guard('local')->user()->user_type == "wholesaler"
-                                                                                            )
-                                                                                            <td>₪ {{ number_format($item['price'], 2) }}</td>
-                                                                                        @endif
-                                                                @else
-                                                                    <td>N/A</td>
-                                                                @endif
+                                                                <td>₪ {{ number_format($item['price'], 2) }}</td>
 
                                                                 <td>
                                                                     <div class="input-add d-flex" id="item-{{ $item['product_id'] }}">
@@ -162,15 +164,10 @@
                                 </table>
                                 </div>
                     @else
-                        @if (!Auth::guard('local')->check())
-                            <p>يرجى تسجيل الدخول لعرض سلة التسوق الخاصة بك.</p>
-                            <p><small>Please login to view your cart.</small></p>
-                        @else
-                            <p>Your cart is empty.</p>
-                        @endif
+                        <p>سلة التسوق فارغة.</p>
+                        <p><small>Your cart is empty.</small></p>
                     @endif
-                    @if(Auth::guard('local')->check())
-                        <div class="cunt_shoping">
+                    <div class="cunt_shoping">
                             <a href="{{route('products')}}">
                                 <button type="button" class="btn btn-sho">العودة إلى المتجر <svg
                                         xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
@@ -179,31 +176,10 @@
                                     </svg></button>
                             </a>
                         </div>
-                    @else
-                        <div class="cunt_shoping" style="display: flex;">
-                         
-                            <a href="{{route('products')}}">
-                                <button type="button" class="btn btn-sho">العودة إلى المتجر <svg
-                                        xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
-                                        width="24px" fill="#5f6368">
-                                        <path d="M400-240 160-480l240-240 56 58-142 142h486v80H314l142 142-56 58Z"></path>
-                                    </svg></button>
-                            </a>
-                            &nbsp;&nbsp;
-                            <a href="{{ route('enquire_now') }}">
-                                <button type="button" class="btn btn-cart w-100">الاستفسار الان
-                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
-                                        width="24px" fill="#5f6368">
-                                        <path d="M400-240 160-480l240-240 56 58-142 142h486v80H314l142 142-56 58Z"></path>
-                                    </svg>
-                                </button>                                
-                            </a>
-                        </div>
-                    @endif
                 </div>
             </div>
 
-            @if(Auth::guard('local')->check())
+            @if(!empty($cart))
                 <div class="col-md-4">
                     @if($totalSubTotal  > 0 || $totalAmount > 0)
                         <div class="cart_det">
@@ -233,13 +209,23 @@
                                         </svg>
                                     </button>
                                 </a> --}}
-                                <button type="button" class="btn btn-cart w-100" id="openInquiryModal" data-bs-toggle="modal" data-bs-target="#inquiryModal">
-                                    الاستفسار الان
-                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
-                                        width="24px" fill="#5f6368">
-                                        <path d="M400-240 160-480l240-240 56 58-142 142h486v80H314l142 142-56 58Z"></path>
-                                    </svg>
-                                </button>                                
+                                @if(Auth::guard('local')->check())
+                                    <button type="button" class="btn btn-cart w-100" id="openInquiryModal" data-bs-toggle="modal" data-bs-target="#inquiryModal">
+                                        الاستفسار الان
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
+                                            width="24px" fill="#5f6368">
+                                            <path d="M400-240 160-480l240-240 56 58-142 142h486v80H314l142 142-56 58Z"></path>
+                                        </svg>
+                                    </button>
+                                @else
+                                    <button type="button" class="btn btn-cart w-100" id="openGuestCheckoutModal" data-bs-toggle="modal" data-bs-target="#guestCheckoutModal">
+                                        إرسال الطلب
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
+                                            width="24px" fill="#5f6368">
+                                            <path d="M400-240 160-480l240-240 56 58-142 142h486v80H314l142 142-56 58Z"></path>
+                                        </svg>
+                                    </button>
+                                @endif                                
                             </div>
                         </div>
                     @endif
@@ -276,6 +262,66 @@
                     </div>
                 </div>
             </div>
+
+            <div class="modal fade" id="guestCheckoutModal" tabindex="-1" aria-labelledby="guestCheckoutModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="guestCheckoutModalLabel">إرسال الطلب / Place Order</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="guestCheckoutForm">
+                                @csrf
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="guest_first_name" class="form-label">الاسم الأول / First Name *</label>
+                                        <input type="text" class="form-control" name="guest_first_name" id="guest_first_name" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="guest_last_name" class="form-label">اسم العائلة / Last Name *</label>
+                                        <input type="text" class="form-control" name="guest_last_name" id="guest_last_name" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="guest_phone" class="form-label">رقم الهاتف / Phone *</label>
+                                        <input type="text" class="form-control" name="guest_phone" id="guest_phone" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="guest_email" class="form-label">البريد الإلكتروني / Email</label>
+                                        <input type="email" class="form-control" name="guest_email" id="guest_email">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="guest_location" class="form-label">الموقع / Location *</label>
+                                    <textarea class="form-control" name="guest_location" id="guest_location" rows="2" placeholder="المدينة، العنوان، أو أي تفاصيل للتوصيل" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="guest_message" class="form-label">ملاحظات / Notes</label>
+                                    <textarea class="form-control" name="message" id="guest_message" rows="3" placeholder="أي ملاحظات إضافية..."></textarea>
+                                </div>
+                                <div id="guestProductList" style="display:none;"></div>
+                                <div class="mb-3">
+                                    <label for="guest_captcha" class="form-label">رمز التحقق / Security code *</label>
+                                    <div class="guest-captcha-box mb-2">
+                                        <img src="{{ route('guest.captcha') }}" id="guestCaptchaImage" alt="Security code">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" id="refreshGuestCaptcha">↻ رمز جديد</button>
+                                    </div>
+                                    <input type="text" class="form-control" name="captcha" id="guest_captcha" required autocomplete="off" placeholder="اكتب الأحرف والأرقام كما تظهر">
+                                    <small class="text-muted">Type the letters and numbers shown in the image.</small>
+                                </div>
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary">إرسال الطلب</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
 
 
@@ -294,7 +340,7 @@
 
 
 @push('script')
-    <script>
+<script>
 
 
 
@@ -474,58 +520,90 @@
 
     </script>
 <script>
+    function loadCartProductsInto(containerSelector) {
+        $.ajax({
+            url: '{{ route("get.cart.data") }}',
+            method: 'GET',
+            success: function(response) {
+                if (response.length > 0) {
+                    var productListHtml = '';
+                    response.forEach(function(item) {
+                        productListHtml += `
+                            <input type="hidden" name="product_id[]" value="${item.product_id}">
+                            <input type="hidden" name="qty[]" value="${item.qty}">
+                        `;
+                    });
+                    $(containerSelector).html(productListHtml);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching cart data:', error);
+            }
+        });
+    }
+
+    function refreshGuestCaptcha() {
+        $('#guestCaptchaImage').attr('src', '{{ route('guest.captcha') }}?refresh=1&t=' + Date.now());
+        $('#guest_captcha').val('');
+    }
+
     $(document).ready(function() {
         $('#openInquiryModal').on('click', function() {
-            // Get the authenticated user's ID from JavaScript
-            var userId = "{{ Auth::guard('local')->id() }}"; // Inject the user's ID via Blade
+            loadCartProductsInto('#productList');
+        });
 
-            // Make AJAX call to get the cart data
+        $('#openGuestCheckoutModal').on('click', function() {
+            loadCartProductsInto('#guestProductList');
+            refreshGuestCaptcha();
+        });
+
+        $('#refreshGuestCaptcha').on('click', function() {
+            refreshGuestCaptcha();
+        });
+
+        $('#inquiryForm').on('submit', function(e) {
+            e.preventDefault();
+
             $.ajax({
-                url: '{{ route("get.cart.data") }}',  // The route you created
-                method: 'GET',
-                data: { user_id: userId },  // Send user_id as part of the data
+                url: '{{ route("save.inquiry") }}',
+                method: 'POST',
+                data: $(this).serialize(),
                 success: function(response) {
-                    if (response.length > 0) {
-                        var productListHtml = '';
-                        response.forEach(function(item) {
-                            // Generate HTML for each cart item
-                            productListHtml += `
-                                <div class="mb-3">
-                                    <label class="form-label">Product ID: ${item.product_id}</label>
-                                    <input type="hidden" name="product_id[]" value="${item.product_id}">
-                                    <input type="hidden" name="qty[]" value="${item.qty}">
-                                    <label class="form-label">Quantity: ${item.qty}</label>
-                                </div>
-                            `;
-                        });
-
-                        // Append the product data to the modal body
-                        $('#productList').html(productListHtml);
-                    }
+                    window.location.href = response.redirect;
                 },
-                error: function(xhr, status, error) {
-                    console.error('Error fetching cart data:', error);
+                error: function(xhr) {
+                    var message = xhr.responseJSON && xhr.responseJSON.error
+                        ? xhr.responseJSON.error
+                        : 'حدث خطأ. يرجى المحاولة مرة أخرى.';
+                    alert(message);
                 }
             });
         });
 
-        // Handle form submission
-        $('#inquiryForm').on('submit', function(e) {
+        $('#guestCheckoutForm').on('submit', function(e) {
             e.preventDefault();
 
-            // Make AJAX call to save the inquiry
+            if (!$('#guest_captcha').val().trim()) {
+                alert('يرجى إدخال رمز التحقق.');
+                return;
+            }
+
             $.ajax({
-                url: '{{ route("save.inquiry") }}',  // The route to save the inquiry
+                url: '{{ route("save.inquiry") }}',
                 method: 'POST',
-                data: $(this).serialize(),  // Serialize the form data
+                data: $(this).serialize(),
                 success: function(response) {
-                    // Show success message and redirect
-                    // alert(response.success);
-                    window.location.href = response.redirect;  // Redirect to the desired page
+                    window.location.href = response.redirect;
                 },
-                error: function(xhr, status, error) {
-                    console.error('Error saving inquiry:', error);
-                    alert('An error occurred. Please try again.');
+                error: function(xhr) {
+                    refreshGuestCaptcha();
+                    var message = xhr.responseJSON && xhr.responseJSON.error
+                        ? xhr.responseJSON.error
+                        : 'حدث خطأ. يرجى المحاولة مرة أخرى.';
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        message = Object.values(xhr.responseJSON.errors).flat().join('\n');
+                    }
+                    alert(message);
                 }
             });
         });
@@ -534,24 +612,20 @@
 
 <script>
     $(document).ready(function () {
+    var isLoggedIn = {{ Auth::guard('local')->check() ? 'true' : 'false' }};
+    var userId = {{ Auth::guard('local')->check() ? Auth::guard('local')->id() : 'null' }};
+
     $(".btn-number").click(function (e) {
         e.preventDefault();
 
         let button = $(this);
         let type = button.attr("data-type");
         let input = button.closest(".input-add").find("input");
-        let productId = input.attr("name").split("-")[1]; // Extract product ID from input name
+        let productId = input.attr("name").split("-")[1];
         let currentValue = parseInt(input.val());
         let min = parseInt(input.attr('min')) || 1;
         let max = parseInt(input.attr('max')) || 10;
-        let userId = "{{ Auth::guard('local')->check() ? Auth::guard('local')->user()->id : null }}"; // Get logged-in user ID
 
-        if (!userId) {
-            alert("User not authenticated!");
-            return;
-        }
-
-        // **Quantity Increase/Decrease**
         if (type === "plus" && currentValue < max) {
             input.val(currentValue + 1);
         } else if (type === "minus" && currentValue > min) {
@@ -560,23 +634,17 @@
             return;
         }
 
-        // **Update Quantity via AJAX**
-        updateQty(userId, productId, input.val());
-
-        // **Enable/Disable buttons accordingly**
+        updateQty(productId, input.val());
         updateButtonState(input, min, max);
     });
 
-    // **Input Change Event**
     $(".input-number").change(function () {
         let input = $(this);
         let min = parseInt(input.attr('min')) || 1;
         let max = parseInt(input.attr('max')) || 10;
         let valueCurrent = parseInt(input.val());
         let productId = input.attr("name").split("-")[1];
-        let userId = "{{ Auth::guard('local')->check() ? Auth::guard('local')->user()->id : null }}"; // Get logged-in user ID
 
-        // Validate input
         if (valueCurrent < min) {
             alert("Minimum quantity reached");
             input.val(min);
@@ -585,14 +653,10 @@
             input.val(max);
         }
 
-        // **Update Quantity via AJAX**
-        updateQty(userId, productId, input.val());
-
-        // **Enable/Disable buttons**
+        updateQty(productId, input.val());
         updateButtonState(input, min, max);
     });
 
-    // **Function to Enable/Disable Buttons**
     function updateButtonState(input, min, max) {
         let currentVal = parseInt(input.val());
         
@@ -600,7 +664,6 @@
         input.closest(".input-add").find(".btn-number[data-type='plus']").prop("disabled", currentVal >= max);
     }
 
-    // **Prevent Non-Numeric Input**
     $(".input-number").keydown(function (e) {
         if ($.inArray(e.keyCode, [46, 8, 9, 27, 13]) !== -1 ||
             (e.keyCode == 65 && e.ctrlKey === true) ||
@@ -612,19 +675,22 @@
         }
     });
 
-    // **AJAX Function to Update Quantity in Database**
-    function updateQty(userId, productId, newValue) {
+    function updateQty(productId, newValue) {
+        var payload = {
+            product_id: productId,
+            quantity: newValue,
+            _token: "{{ csrf_token() }}"
+        };
+
+        if (isLoggedIn && userId) {
+            payload.user_id = userId;
+        }
+
         $.ajax({
             url: "/update-quantity",
             method: "POST",
-            data: {
-                user_id: userId,
-                product_id: productId,
-                quantity: newValue,
-                _token: "{{ csrf_token() }}"
-            },
+            data: payload,
             success: function (response) {
-                console.log("Quantity updated:", response.message);
                 window.location.reload();
             },
             error: function (error) {
@@ -633,8 +699,6 @@
         });
     }
 });
-
-
 </script>
 
 @endpush

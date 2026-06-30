@@ -569,6 +569,7 @@ Route::get('cart-page', [FrontendController::class, 'add_cartpage'])->name('cart
 Route::get('/get-cart-data', [FrontendController::class, 'getCartData'])->name('get.cart.data');
 Route::get('/get-cart-count', [FrontendController::class, 'getCartCount'])->name('get.cart.count');
 Route::post('/save-inquiry', [FrontendController::class, 'saveInquiry'])->name('save.inquiry');
+Route::get('/guest-captcha', [FrontendController::class, 'guestCaptchaImage'])->name('guest.captcha');
 Route::post('/update-quantity', [FrontendController::class, 'updateQuantity']);
 
 // Route::get('emptyCart', [FrontendController::class, 'empty_cart'])->name('empty_cart');

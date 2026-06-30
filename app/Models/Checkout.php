@@ -11,6 +11,11 @@ class Checkout extends Model
 
     protected $fillable = [
         'user_id',
+        'guest_first_name',
+        'guest_last_name',
+        'guest_phone',
+        'guest_email',
+        'guest_location',
         'product_id',
         'qty',
         'message',
@@ -26,4 +31,17 @@ class Checkout extends Model
         return $this->belongsTo(Product::class);
     }
 
+    public function isGuestOrder(): bool
+    {
+        return empty($this->user_id);
+    }
+
+    public function customerDisplayName(): string
+    {
+        if ($this->isGuestOrder()) {
+            return trim(($this->guest_first_name ?? '') . ' ' . ($this->guest_last_name ?? ''));
+        }
+
+        return '';
+    }
 }
