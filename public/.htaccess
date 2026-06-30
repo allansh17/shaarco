@@ -5,6 +5,10 @@
 
     RewriteEngine On
 
+    # Block dotfiles and environment files
+    RewriteRule ^\.env - [F,L]
+    RewriteRule ^\. - [F,L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
