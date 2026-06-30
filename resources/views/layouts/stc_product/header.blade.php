@@ -607,6 +607,18 @@
 
     @stack('script')
 
+    @if(session('order_placed'))
+    <script>
+        $(function () {
+            toastr.success(@json(session('order_placed')), '', {
+                timeOut: 6000,
+                closeButton: true,
+                progressBar: true,
+                positionClass: 'toast-top-center'
+            });
+        });
+    </script>
+    @endif
 
     <script>
         $(document).ready(function () {

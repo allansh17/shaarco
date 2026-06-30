@@ -484,11 +484,17 @@ class FrontendController extends Controller
     }
 
     // Clear the cart cookie after saving the inquiry
-    Cookie::queue('cart', json_encode([]), 0);  // Clear the cart cookie by setting it to an empty array and expiration time to 0
-    // Return success response with redirect URL
+    Cookie::queue('cart', json_encode([]), 0);
+
+    $successMessage = $userId
+        ? 'تم إرسال طلبك بنجاح! سنتواصل معك في أقرب وقت.'
+        : 'تم استلام طلبك بنجاح! سنتواصل معك في أقرب وقت.';
+
+    session()->flash('order_placed', $successMessage);
+
     return response()->json([
-        'success' => 'Inquiry saved successfully!',
-        'redirect' => url('/')  // Redirect to the desired route
+        'success' => $successMessage,
+        'redirect' => route('index'),
     ]);
 }
 
