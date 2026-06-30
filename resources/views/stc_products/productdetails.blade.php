@@ -309,7 +309,7 @@
                         <div class="product_price">{{$productdetails->loyal_price}}</div>
                     @elseif(Auth::guard('local')->check() && Auth::guard('local')->user()->user_type == "wholesaler")
                         <div class="product_price">{{$productdetails->wholesaler_price}}</div>
-                    @elseif(Auth::guard('local')->check() && Auth::guard('local')->user()->user_type == "normal")
+                    @else
                         <div class="product_price">{{$productdetails->normal_price}}</div>
                     @endif
 
@@ -345,14 +345,10 @@
                         </select> --}}
                     </div>
                    @if($productdetails->stock_status > 0)
-                        <form action="{{ route('add_tocart', $productdetails->id) }}" method="POST" class="mt-3">
+                        <form class="add-to-cart-form mt-3" data-product-id="{{ $productdetails->id }}" method="POST" id="addToCartForm">
                             @csrf
                             <div class="pr_btn">
-                                @if(!Auth::guard('local')->check())
-                                    <a href="{{route('sign_in')}}" class="btn btn-primary">Add to Cart</a>
-                                @else
-                                    <button type="submit" class="btn btn-primary">Add to Cart</button>
-                                @endif
+                                <button type="submit" class="btn btn-primary btn-add-to-cart" data-default-text="أضف إلى السلة">أضف إلى السلة</button>
                                 <div class="input-add d-flex">
                                     <span class="input-group-btn">
                                         <button type="button" class="btn btn-default btn-number" data-type="plus" data-field="qty">
@@ -494,7 +490,7 @@
                                         <div class="product_price">{{$product->loyal_price}}</div>
                                     @elseif(Auth::guard('local')->check() && Auth::guard('local')->user()->user_type == "wholesaler")
                                         <div class="product_price">{{$product->wholesaler_price}}</div>
-                                    @elseif(Auth::guard('local')->check() && Auth::guard('local')->user()->user_type == "normal")
+                                    @else
                                         <div class="product_price">{{$product->normal_price}}</div>
                                     @endif
                                 </div>
@@ -674,10 +670,9 @@
         console.log("Selected Colors:", selectedColors.join(',')); // 🐞 Debugging - Check values in console
     }
 
-    // 🎯 Ensure colors are saved before form submission
-    $("#addToCartForm").submit(function() {
-        updateSelectedColors(); // Update before form submission
-        console.log("Submitting Colors:", $("#selectedColorsInput").val()); // 🐞 Debugging
+    // Ensure colors are saved before form submission (add-to-cart AJAX is handled globally)
+    $("#addToCartForm").on('submit', function() {
+        updateSelectedColors();
     });
 });
 

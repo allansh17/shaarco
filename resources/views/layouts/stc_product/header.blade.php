@@ -284,6 +284,75 @@
         .mobile-user-name i {
             margin-left: 8px;
         }
+
+        .btn-add-to-cart {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn-add-to-cart.is-adding {
+            transform: scale(0.97);
+            opacity: 0.88;
+            pointer-events: none;
+        }
+
+        .btn-add-to-cart.is-added {
+            background-color: #198754 !important;
+            border-color: #198754 !important;
+            transform: scale(1.02);
+            box-shadow: 0 6px 18px rgba(25, 135, 84, 0.35);
+        }
+
+        @keyframes addToCartPulse {
+            0% { box-shadow: 0 0 0 0 rgba(27, 99, 146, 0.45); }
+            70% { box-shadow: 0 0 0 10px rgba(27, 99, 146, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(27, 99, 146, 0); }
+        }
+
+        .btn-add-to-cart.is-pulse {
+            animation: addToCartPulse 0.55s ease-out;
+        }
+
+        @keyframes cartBadgePop {
+            0%, 100% { transform: scale(1); }
+            40% { transform: scale(1.35); }
+            70% { transform: scale(0.92); }
+        }
+
+        .cart-count.cart-badge-pop {
+            animation: cartBadgePop 0.5s ease;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 4px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background-color: #ffffff;
+            color: #0a2d45;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            z-index: 2;
+        }
+
+        .cart-count.is-visible {
+            display: flex;
+        }
+
+        .mobile-cart-icon .cart-count {
+            top: -8px;
+            right: -8px;
+        }
     </style>
 </head>
 
@@ -356,24 +425,9 @@
                                 $totalItems = App\Helpers\CartHelper::getTotalItems();
                             @endphp
                             @if ($totalItems > 0)
-                                                            <span id="desktop-cart-count" class="cart-count" style=" position: absolute;
-                                    top: -5px;
-                                    right: -5px;
-                                    background-color: #ffffff;
-                                    color: #1b6392;
-                                    border-radius: 50%;
-                                    padding: 8px 5px 5px 0px;
-                                    font-size: 12px;
-                                    display: flex
-                                ;
-                                    align-items: center;
-                                    height: 20px;
-                                    width: 20px;
-                                ">
-                                                                {{ $totalItems }}
-                                                            </span>
+                                <span id="desktop-cart-count" class="cart-count is-visible">{{ $totalItems }}</span>
                             @else
-                                <span id="desktop-cart-count" class="cart-count" style="display: none;"></span>
+                                <span id="desktop-cart-count" class="cart-count"></span>
                             @endif
                         </a>
 
@@ -492,11 +546,9 @@
                             $totalItems = App\Helpers\CartHelper::getTotalItems();
                         @endphp
                         @if ($totalItems > 0)
-                            <span id="mobile-cart-count" style="position: absolute; top: -8px; right: -8px; background-color: #ffffff; color: #1b6392; border-radius: 50%; padding: 2px 6px; font-size: 11px; font-weight: bold; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">
-                                {{ $totalItems }}
-                            </span>
+                            <span id="mobile-cart-count" class="cart-count is-visible">{{ $totalItems }}</span>
                         @else
-                            <span id="mobile-cart-count" style="display: none;"></span>
+                            <span id="mobile-cart-count" class="cart-count"></span>
                         @endif
                     </div>
                 </a>
@@ -706,6 +758,97 @@
                 });
             });
 
+        });
+    </script>
+
+    <script>
+        window.ShaarcoCart = {
+            defaultLabel: 'أضف إلى السلة',
+            successLabel: '✓ تمت الإضافة',
+            toastSuccess: 'تمت إضافة المنتج إلى السلة بنجاح',
+            toastError: 'تعذرت إضافة المنتج. يرجى المحاولة مرة أخرى.',
+
+            refreshBadge: function () {
+                $.get('{{ route('get.cart.count') }}', function (data) {
+                    var count = parseInt(data.count, 10) || 0;
+                    var $desktopCount = $('#desktop-cart-count');
+                    var $mobileCount = $('#mobile-cart-count');
+
+                    if (count > 0) {
+                        $desktopCount.text(count).addClass('is-visible cart-badge-pop');
+                        $mobileCount.text(count).addClass('is-visible cart-badge-pop');
+                        setTimeout(function () {
+                            $desktopCount.removeClass('cart-badge-pop');
+                            $mobileCount.removeClass('cart-badge-pop');
+                        }, 500);
+                    } else {
+                        $desktopCount.removeClass('is-visible cart-badge-pop');
+                        $mobileCount.removeClass('is-visible cart-badge-pop');
+                    }
+                });
+            },
+
+            animateSuccess: function ($button) {
+                var defaultText = $button.data('default-text') || this.defaultLabel;
+
+                $button.removeClass('is-adding is-pulse')
+                    .addClass('is-added')
+                    .text(this.successLabel);
+
+                setTimeout(function () {
+                    $button.removeClass('is-added').text(defaultText);
+                }, 1800);
+            },
+
+            animateError: function ($button) {
+                var defaultText = $button.data('default-text') || this.defaultLabel;
+                $button.removeClass('is-adding is-pulse is-added').text(defaultText);
+            }
+        };
+
+        $(document).on('submit', '.add-to-cart-form', function (e) {
+            e.preventDefault();
+
+            var form = $(this);
+            var productId = form.data('product-id');
+            var quantity = form.find('input[name="qty"]').val() || 1;
+            var $button = form.find('.btn-add-to-cart');
+
+            if ($button.prop('disabled')) {
+                return;
+            }
+
+            $button.prop('disabled', true).addClass('is-adding is-pulse');
+
+            $.ajax({
+                url: '/add_tocart/' + productId,
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    qty: quantity,
+                    selected_colors: form.find('#selectedColorsInput').val() || ''
+                },
+                success: function () {
+                    toastr.success(ShaarcoCart.toastSuccess, '', {
+                        timeOut: 1800,
+                        closeButton: false,
+                        progressBar: false
+                    });
+                    ShaarcoCart.animateSuccess($button);
+                    ShaarcoCart.refreshBadge();
+                },
+                error: function () {
+                    toastr.error(ShaarcoCart.toastError, '', {
+                        timeOut: 2000,
+                        closeButton: false,
+                        progressBar: false
+                    });
+                    ShaarcoCart.animateError($button);
+                },
+                complete: function () {
+                    $button.prop('disabled', false).removeClass('is-adding');
+                }
+            });
         });
     </script>
 

@@ -17,6 +17,7 @@ use App\Models\Brands;
 
 
 use Illuminate\Http\Request;
+use App\Services\SimpleCaptchaService;
 use PhpParser\Node\Expr\Cast\Object_;
 use Auth;
 use Illuminate\Support\Facades\Hash;
@@ -221,6 +222,12 @@ class FrontendController extends Controller
                 $totalSubTotal += $item->total_price;
                 $totalItems += $item->qty;
             }
+        } else {
+            $cart = $this->buildGuestCartArray();
+            foreach ($cart as $item) {
+                $totalSubTotal += $item['price'];
+                $totalItems += $item['quantity'];
+            }
         }
 
         $shippingCost = 0;
@@ -344,20 +351,41 @@ class FrontendController extends Controller
 
     public function saveInquiry(Request $request)
 {
-    // dd($request->all());
-    // Validate the incoming request
-    $request->validate([
-        'message' => 'required|string|max:1000', // Validate message
-        'product_id' => 'required|array',        // Validate product IDs (array of IDs)
-        'qty' => 'required|array',               // Validate quantities (array of quantities)
-    ]);
+    $userId = Auth::guard('local')->id();
 
-    // Fetch the authenticated user
-    $userId = Auth::guard('local')->id();  // Get the authenticated user's ID
+    $rules = [
+        'product_id' => 'required|array',
+        'qty' => 'required|array',
+    ];
+
+    if ($userId) {
+        $rules['message'] = 'required|string|max:1000';
+    } else {
+        $rules['guest_first_name'] = 'required|string|max:100';
+        $rules['guest_last_name'] = 'required|string|max:100';
+        $rules['guest_phone'] = 'required|string|max:30';
+        $rules['guest_location'] = 'required|string|max:500';
+        $rules['guest_email'] = 'nullable|email|max:255';
+        $rules['message'] = 'nullable|string|max:1000';
+        $rules['captcha'] = 'required|string|max:10';
+    }
+
+    $messages = [
+        'captcha.required' => 'يرجى إدخال رمز التحقق.',
+    ];
+
+    $request->validate($rules, $messages);
+
+    if (!$userId) {
+        $captcha = app(SimpleCaptchaService::class);
+        if (!$captcha->verify($request->input('captcha'))) {
+            return response()->json(['error' => 'رمز التحقق غير صحيح. يرجى المحاولة مرة أخرى.'], 422);
+        }
+    }
 
     // Get product IDs and quantities from the request
-    $productIds = $request->input('product_id');  // Array of product IDs
-    $quantities = $request->input('qty');          // Array of quantities
+    $productIds = $request->input('product_id');
+    $quantities = $request->input('qty');
 
     // Get current cart (source of truth - what user actually sees)
     // For logged-in users, use database Cart table (no size limit)
@@ -412,6 +440,14 @@ class FrontendController extends Controller
     $checkout->user_id = $userId;
     $checkout->message = $request->message;
 
+    if (!$userId) {
+        $checkout->guest_first_name = $request->guest_first_name;
+        $checkout->guest_last_name = $request->guest_last_name;
+        $checkout->guest_phone = $request->guest_phone;
+        $checkout->guest_email = $request->guest_email;
+        $checkout->guest_location = $request->guest_location;
+    }
+
     // Save product IDs and quantities as comma-separated values
     $checkout->product_id = implode(',', $productIds); // Storing product IDs as comma-separated values
     $checkout->qty = implode(',', $quantities);  // Storing quantities as comma-separated values
@@ -443,8 +479,9 @@ class FrontendController extends Controller
             ->whereNotIn('product_id', $validProductIdsInt)
             ->delete();
     }
-    // Optionally, delete the cart data (if needed, assuming the data is no longer needed in the cart table)
-    Cart::where('user_id', $userId)->delete();
+    if ($userId) {
+        Cart::where('user_id', $userId)->delete();
+    }
 
     // Clear the cart cookie after saving the inquiry
     Cookie::queue('cart', json_encode([]), 0);  // Clear the cart cookie by setting it to an empty array and expiration time to 0
@@ -459,13 +496,14 @@ class FrontendController extends Controller
 public function updateQuantity(Request $request)
 {
     $request->validate([
-        'user_id' => 'required|integer',
+        'user_id' => 'nullable|integer',
         'product_id' => 'required|integer',
         'quantity' => 'required|integer|min:1|max:10',
     ]);
 
-    if (Auth::guard('local')->check() && Auth::guard('local')->id() == $request->user_id) {
-        $cartItem = Cart::where('user_id', $request->user_id)
+    if (Auth::guard('local')->check()) {
+        $userId = Auth::guard('local')->id();
+        $cartItem = Cart::where('user_id', $userId)
             ->where('product_id', $request->product_id)
             ->first();
 
@@ -481,15 +519,24 @@ public function updateQuantity(Request $request)
     }
 
     $cart = json_decode(Cookie::get('cart', '[]'), true);
+    if (!is_array($cart)) {
+        $cart = [];
+    }
+
     foreach ($cart as &$item) {
         if ($item['product_id'] == $request->product_id) {
-            $item['quantity'] = $request->quantity;
-            $item['price'] = $request->quantity * $item['price_per_unit'];
+            $product = Product::find($item['product_id']);
+            $pricePerUnit = $product
+                ? $this->resolveProductPrice($product)
+                : (float) ($item['price_per_unit'] ?? 0);
+            $item['price_per_unit'] = $pricePerUnit;
+            $item['quantity'] = (int) $request->quantity;
+            $item['price'] = $request->quantity * $pricePerUnit;
             break;
         }
     }
 
-    Cookie::queue('cart', json_encode(array_values($cart)), 60);
+    Cookie::queue('cart', json_encode(array_values($cart)), 60 * 24 * 7);
 
     return response()->json(['message' => 'Quantity updated successfully']);
 }
@@ -508,7 +555,53 @@ public function updateQuantity(Request $request)
             return (float) $product->normal_price;
         }
 
-        return (float) $product->price;
+        return (float) $product->normal_price;
+    }
+
+    protected function buildGuestCartArray(): array
+    {
+        $cart = [];
+        $cookieCart = json_decode(Cookie::get('cart', '[]'), true);
+
+        if (!is_array($cookieCart)) {
+            return $cart;
+        }
+
+        foreach ($cookieCart as $item) {
+            if (!isset($item['product_id'], $item['quantity'])) {
+                continue;
+            }
+
+            $product = Product::find($item['product_id']);
+            if (!$product || $product->trashed()) {
+                continue;
+            }
+
+            $qty = (int) $item['quantity'];
+            $pricePerUnit = $this->resolveProductPrice($product);
+            $lineTotal = $pricePerUnit * $qty;
+
+            $cart[] = [
+                'product_id' => $item['product_id'],
+                'name' => $product->name ?? '',
+                'product_image' => $product->product_image ?? '',
+                'price' => $lineTotal,
+                'quantity' => $qty,
+                'price_per_unit' => $pricePerUnit,
+            ];
+        }
+
+        return $cart;
+    }
+
+    public function guestCaptchaImage(Request $request)
+    {
+        $captcha = app(SimpleCaptchaService::class);
+        $code = $request->boolean('refresh')
+            ? $captcha->generateCode()
+            : $captcha->getOrCreateCode();
+
+        return $captcha->imageResponse($code);
     }
 
     protected function mergeCookieCartIntoDatabase(int $userId): void

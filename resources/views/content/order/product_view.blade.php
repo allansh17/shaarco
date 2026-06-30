@@ -296,12 +296,17 @@
                                 <img src="{{ !empty($order->profileImage) ? asset('uploads/customer_profile_img/' . $order->profileImage) : asset('uploads/default_image/default.png') }}" class="rounded-circle">
                             </div>
                             <div class="flex-column">
-                                <a href="{{ url('customer/view/' . ($order->customer_id)) }}" class="text-body text-nowrap">
-                                    <h6 class="mb-0">{{ $order->name }}</h6>
-                                </a>
-                                <small class="text-muted">Customer ID: {{$order->user_id }}</small><br>
-                                <small class="text-muted">Customer Name: {{ucfirst($order->first_name) }} {{ ucfirst($order->last_name) }}</small><br>
-                                <small class="text-muted">Customer Type: {{ucfirst($order->user_type) }}</small>
+                                @if($order->user_id)
+                                    <a href="{{ url('customer/view/' . ($order->user_id)) }}" class="text-body text-nowrap">
+                                        <h6 class="mb-0">{{ $order->name }}</h6>
+                                    </a>
+                                    <small class="text-muted">Customer ID: {{$order->user_id }}</small><br>
+                                @else
+                                    <h6 class="mb-0">{{ trim(($order->guest_first_name ?? $order->first_name ?? '') . ' ' . ($order->guest_last_name ?? $order->last_name ?? '')) }}</h6>
+                                    <small class="text-muted">Guest order (no account)</small><br>
+                                @endif
+                                <small class="text-muted">Customer Name: {{ucfirst($order->first_name ?? $order->guest_first_name ?? '') }} {{ ucfirst($order->last_name ?? $order->guest_last_name ?? '') }}</small><br>
+                                <small class="text-muted">Customer Type: {{ $order->user_id ? ucfirst($order->user_type) : 'Guest' }}</small>
                             </div>
                         </div>
                         <!-- <div class="d-flex justify-content-start align-items-center mb-4">
@@ -310,16 +315,18 @@
                         </div> -->
                         <hr>
                         <h6 class="mt-3">Contact information</h6>
-                        <a href="mailto:{{ $order->email }}" class="text-decoration-none mt-3">
+                        @if(!empty($order->email ?? $order->guest_email))
+                        <a href="mailto:{{ $order->email ?? $order->guest_email }}" class="text-decoration-none mt-3">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd" clip-rule="evenodd"
                                     d="M21.6974 15.8335C21.6974 17.8602 20.0488 19.5062 18.0247 19.5062H5.97513C3.95102 19.5062 2.30238 17.8601 2.30238 15.8335V8.16652C2.30193 7.51333 2.47691 6.872 2.80905 6.30956L8.68849 12.189C9.5681 13.0712 10.746 13.5573 12.0011 13.5573C13.2537 13.5573 14.4316 13.0712 15.3112 12.189L21.1907 6.30956C21.5228 6.87199 21.6978 7.51332 21.6973 8.16652V15.8335H21.6974ZM18.0246 4.49381H5.97513C5.13925 4.49381 4.36764 4.7767 3.75039 5.24738L9.68899 11.1885C10.3037 11.8006 11.1241 12.1402 12.0011 12.1402C12.8756 12.1402 13.6961 11.8006 14.3107 11.1885L20.2493 5.24738C19.6321 4.7767 18.8606 4.49381 18.0246 4.49381ZM18.0246 3.07669H5.97513C3.16914 3.07669 0.885254 5.36058 0.885254 8.16656V15.8335C0.885254 18.6421 3.16914 20.9234 5.97513 20.9234H18.0246C20.8306 20.9234 23.1145 18.6421 23.1145 15.8335V8.16652C23.1145 5.36053 20.8306 3.07669 18.0246 3.07669Z"
                                     fill="#888888" />
                             </svg>
-                            {{ $order->email }}
+                            {{ $order->email ?? $order->guest_email }}
                         </a>
-                        <a href="tel:{{ $order->phone }}" class="text-decoration-none mt-3">
+                        @endif
+                        <a href="tel:{{ $order->phone ?? $order->guest_phone }}" class="text-decoration-none mt-3">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd" clip-rule="evenodd"
@@ -327,8 +334,11 @@
                                     fill="#888888" />
                             </svg>
 
-                            {{ $order->phone }}
+                            {{ $order->phone ?? $order->guest_phone }}
                         </a>
+                        @if(!empty($order->guest_location))
+                        <p class="mt-3 mb-0"><strong>Location:</strong> {{ $order->guest_location }}</p>
+                        @endif
                         <!-- <hr>
                             <h6 class="gs-num mt-4 pb-1 mb-2">GST Number</h6>
                             @if (isset($order->gst_no) && !empty($order->gst_no))

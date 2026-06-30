@@ -267,7 +267,7 @@
                                                 <div class="product_price">{{ $product->loyal_price }}</div>
                                             @elseif(Auth::guard('local')->check() && Auth::guard('local')->user()->user_type == "wholesaler")
                                                 <div class="product_price">{{ $product->wholesaler_price }}</div>
-                                            @elseif(Auth::guard('local')->check() && Auth::guard('local')->user()->user_type == "normal")
+                                            @else
                                                 <div class="product_price">{{ $product->normal_price }}</div>
                                             @endif
 
@@ -289,11 +289,7 @@
                                                             </button>
                                                         </span>
                                                     </div>
-                                                    @if(!Auth::guard('local')->check())
-                                                        <a href="{{route('sign_in')}}" class="btn btn-primary mt-2 w-100">Add to Cart</a>
-                                                    @else
-                                                        <button type="submit" class="btn btn-primary mt-2 w-100">Add to Cart</button>
-                                                    @endif
+                                                    <button type="submit" class="btn btn-primary mt-2 w-100 btn-add-to-cart" data-default-text="أضف إلى السلة">أضف إلى السلة</button>
                                                 </form>
                                             @endif
                                         </div>
@@ -757,56 +753,7 @@
                 input.closest(".input-add").find(".btn-number[data-type='plus']").prop("disabled", input.val() >= max);
             });
 
-            function refreshCartCountBadge() {
-                $.get('{{ route('get.cart.count') }}', function (data) {
-                    let count = parseInt(data.count, 10) || 0;
-                    let $desktopCount = $('#desktop-cart-count');
-                    let $mobileCount = $('#mobile-cart-count');
-
-                    if (count > 0) {
-                        $desktopCount.text(count).show();
-                        $mobileCount.text(count).show();
-                    } else {
-                        $desktopCount.hide();
-                        $mobileCount.hide();
-                    }
-                });
-            }
-
-            // Handle form submission
-            $(".add-to-cart-form").submit(function(e) {
-                e.preventDefault();
-                
-                let form = $(this);
-                let productId = form.data('product-id');
-                let quantity = form.find('input[name="qty"]').val();
-                
-                $.ajax({
-                    url: '/add_tocart/' + productId,
-                    method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        qty: quantity
-                    },
-                    success: function(response) {
-                        // Show success toast notification
-                        toastr.success('تمت اضافة الاصناف للسلة بنجاح، الرجاء استكمال ارسال الطلب في سلتك', '', {
-                            timeOut: 1000,
-                            closeButton: false,
-                            progressBar: false
-                        });
-                        
-                        refreshCartCountBadge();
-                    },
-                    error: function(xhr) {
-                        toastr.error('Error adding product to cart. Please try again.', '', {
-                            timeOut: 1000,
-                            closeButton: false,
-                            progressBar: false
-                        });
-                    }
-                });
-            });
+            // add-to-cart handled globally in layout (ShaarcoCart)
 
             // Prevent non-numeric input
             $(".input-number").keydown(function(e) {

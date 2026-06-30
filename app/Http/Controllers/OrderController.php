@@ -97,8 +97,8 @@ class OrderController extends Controller
     {
         $q = Checkout::select(
             'checkouts.*',
-            DB::raw("CONCAT(COALESCE(customers.first_name, ''), ' ', COALESCE(customers.last_name, '')) as customer_name"),
-            'customers.phone as mobile_number',
+            DB::raw("COALESCE(NULLIF(TRIM(CONCAT(COALESCE(customers.first_name, ''), ' ', COALESCE(customers.last_name, ''))), ''), CONCAT(COALESCE(checkouts.guest_first_name, ''), ' ', COALESCE(checkouts.guest_last_name, ''))) as customer_name"),
+            DB::raw("COALESCE(customers.phone, checkouts.guest_phone) as mobile_number"),
             DB::raw("SUM(product_orders.qty) as product_count")
              // DB::raw("COALESCE(SUM(checkouts.qty), 0) as product_count")
         )
@@ -598,7 +598,15 @@ class OrderController extends Controller
             'customers.email',
             'customers.phone',
             'customers.user_type'
-        )->join('customers', 'customers.id', 'checkouts.user_id')->findOrFail($id);
+        )->leftJoin('customers', 'customers.id', 'checkouts.user_id')->findOrFail($id);
+
+        if ($orders->isGuestOrder()) {
+            $orders->first_name = $orders->guest_first_name;
+            $orders->last_name = $orders->guest_last_name;
+            $orders->email = $orders->guest_email;
+            $orders->phone = $orders->guest_phone;
+            $orders->user_type = 'normal';
+        }
 
         $data['product_order'] = $p_orders = ProductOrder::select(
             'product_orders.*',
@@ -625,7 +633,9 @@ class OrderController extends Controller
         $data['order_item_count'] = $orderItemCount;
         $data['shipping_address'] = CustomerAddress::select('*')->where('id', $orders->customer_address_id)->first();
         $data['billing_address'] = CustomerAddress::select('*')->where('id', $orders->customer_billingaddress_id)->first();
-        $data['total_order'] = Checkout::where('user_id', $orders->user_id)->count();
+        $data['total_order'] = $orders->user_id
+            ? Checkout::where('user_id', $orders->user_id)->count()
+            : 1;
 
         return $data;
     }
