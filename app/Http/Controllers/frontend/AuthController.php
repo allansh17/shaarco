@@ -207,7 +207,7 @@ class AuthController extends Controller
 
         $response = redirect()->route('index')->with(['status' => 'true', 'message' => 'Login successfully']);
 
-        return $deviceLogin->queueDeviceCookie($response, $evaluation['device_uid']);
+        return $deviceLogin->queueDeviceCookie($response, $evaluation['device_uid'], $request);
 
 
         // $validator = Validator::make($request->all(), [
@@ -387,7 +387,7 @@ class AuthController extends Controller
 
                 $response = response()->json(['status' => true, 'message' => 'Login successfully']);
 
-                return $deviceLogin->queueDeviceCookie($response, $evaluation['device_uid']);
+                return $deviceLogin->queueDeviceCookie($response, $evaluation['device_uid'], $request);
             } else {
                 return response()->json(['status' => false, 'message' => 'Please enter valid OTP']);
             }
@@ -441,7 +441,7 @@ class AuthController extends Controller
 
                 $response = response()->json(['status' => 'true', 'message' => 'Profile created successfully']);
 
-                return $deviceLogin->queueDeviceCookie($response, $evaluation['device_uid']);
+                return $deviceLogin->queueDeviceCookie($response, $evaluation['device_uid'], $request);
             } else {
                 return ["status" => false, "message" => "Oops! Something went wrong try again"];
             }
