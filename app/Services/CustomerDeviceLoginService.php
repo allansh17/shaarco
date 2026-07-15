@@ -17,24 +17,28 @@ class CustomerDeviceLoginService
 
     public function evaluateLogin(Customer $customer, Request $request): array
     {
-        $cookieUid = $request->cookie(self::COOKIE_NAME);
         $stored = $customer->login_device_hash;
+        $deviceCookie = $this->readDeviceCookie($request);
 
         if (empty($stored)) {
             return $this->registerDevice($customer, 'first_login');
         }
 
-        if ($cookieUid && hash_equals($stored, $cookieUid)) {
+        if (!$deviceCookie['present']) {
+            return $this->restoreMissingDeviceCookie($customer, 'missing_cookie');
+        }
+
+        if ($deviceCookie['legacy']) {
+            return $this->restoreMissingDeviceCookie($customer, 'legacy_encrypted_cookie');
+        }
+
+        if (hash_equals($stored, $deviceCookie['value'])) {
             return [
                 'allowed' => true,
                 'paused' => false,
                 'device_uid' => $stored,
                 'message' => null,
             ];
-        }
-
-        if (empty($cookieUid)) {
-            return $this->registerDevice($customer, 'missing_cookie_rebind');
         }
 
         return $this->pauseForDifferentDevice($customer, $request);
@@ -82,6 +86,45 @@ class CustomerDeviceLoginService
             'allowed' => true,
             'paused' => false,
             'device_uid' => $newUid,
+            'message' => null,
+        ];
+    }
+
+    private function readDeviceCookie(Request $request): array
+    {
+        if (!$request->cookies->has(self::COOKIE_NAME)) {
+            return [
+                'present' => false,
+                'legacy' => false,
+                'value' => '',
+            ];
+        }
+
+        $raw = (string) $request->cookies->get(self::COOKIE_NAME);
+
+        return [
+            'present' => true,
+            'legacy' => $this->isLegacyEncryptedCookie($raw),
+            'value' => $raw,
+        ];
+    }
+
+    private function isLegacyEncryptedCookie(string $value): bool
+    {
+        return str_starts_with($value, 'eyJpdiI6');
+    }
+
+    private function restoreMissingDeviceCookie(Customer $customer, string $reason = 'missing_cookie'): array
+    {
+        Log::info('Customer device cookie restored', [
+            'customer_id' => $customer->id,
+            'reason' => $reason,
+        ]);
+
+        return [
+            'allowed' => true,
+            'paused' => false,
+            'device_uid' => $customer->login_device_hash,
             'message' => null,
         ];
     }
