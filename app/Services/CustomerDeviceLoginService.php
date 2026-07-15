@@ -20,19 +20,17 @@ class CustomerDeviceLoginService
         $stored = $customer->login_device_hash;
         $deviceCookie = $this->readDeviceCookie($request);
 
+        // First successful login ever: lock this browser as the only allowed device.
         if (empty($stored)) {
             return $this->registerDevice($customer, 'first_login');
         }
 
-        if (!$deviceCookie['present']) {
-            return $this->restoreMissingDeviceCookie($customer, 'missing_cookie');
-        }
-
-        if ($deviceCookie['legacy']) {
-            return $this->restoreMissingDeviceCookie($customer, 'legacy_encrypted_cookie');
-        }
-
-        if (hash_equals($stored, $deviceCookie['value'])) {
+        // Same registered browser (cookie matches DB).
+        if (
+            $deviceCookie['present']
+            && !$deviceCookie['legacy']
+            && hash_equals($stored, $deviceCookie['value'])
+        ) {
             return [
                 'allowed' => true,
                 'paused' => false,
@@ -41,7 +39,22 @@ class CustomerDeviceLoginService
             ];
         }
 
-        return $this->pauseForDifferentDevice($customer, $request);
+        // Old encrypted cookie from before the plain-cookie change: same browser migration only.
+        if ($deviceCookie['present'] && $deviceCookie['legacy']) {
+            Log::info('Customer device cookie migrated from legacy encryption', [
+                'customer_id' => $customer->id,
+            ]);
+
+            return [
+                'allowed' => true,
+                'paused' => false,
+                'device_uid' => $stored,
+                'message' => null,
+            ];
+        }
+
+        // Missing cookie (new phone / incognito / cleared data) OR wrong cookie = sharing / other device.
+        return $this->pauseForDifferentDevice($customer, $request, $deviceCookie['present'] ? 'cookie_mismatch' : 'missing_cookie');
     }
 
     public function queueDeviceCookie(Response $response, ?string $deviceUid, ?Request $request = null): Response
@@ -114,25 +127,11 @@ class CustomerDeviceLoginService
         return str_starts_with($value, 'eyJpdiI6');
     }
 
-    private function restoreMissingDeviceCookie(Customer $customer, string $reason = 'missing_cookie'): array
-    {
-        Log::info('Customer device cookie restored', [
-            'customer_id' => $customer->id,
-            'reason' => $reason,
-        ]);
-
-        return [
-            'allowed' => true,
-            'paused' => false,
-            'device_uid' => $customer->login_device_hash,
-            'message' => null,
-        ];
-    }
-
-    private function pauseForDifferentDevice(Customer $customer, Request $request): array
+    private function pauseForDifferentDevice(Customer $customer, Request $request, string $reason): array
     {
         Log::warning('Customer account paused for device mismatch', [
             'customer_id' => $customer->id,
+            'reason' => $reason,
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
